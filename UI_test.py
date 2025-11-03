@@ -2,25 +2,24 @@ import pygame
 import sys
 import csv
 from datetime import datetime
+import yaml
+from config_loader import load_config, init_from_config
 
 pygame.init()
 
-# -----------------------------------------------------
-# 전역 상수
-# -----------------------------------------------------
-WIDTH, HEIGHT = 1280, 720
-COLOR_TOP = (40, 40, 40)
-COLOR_LEFT = (20, 20, 20)
-COLOR_MAIN = (30, 30, 50)
-COLOR_BOTTOM = (50, 70, 100)
-COLOR_TEXT = (255, 255, 255)
-COLOR_BUTTON = (80, 80, 80)
-COLOR_BUTTON_HOVER = (100, 100, 120)
+config = load_config()
+WIDTH, HEIGHT, COLORS, FONTS, LOG_FILE = init_from_config(config)
 
-font = pygame.font.SysFont("malgungothic", 24)
-small_font = pygame.font.SysFont("malgungothic", 18)
-
-LOG_FILE = "interaction_log.csv"
+COLOR_TOP = COLORS["TOP"]
+COLOR_TEXT = COLORS["TEXT"]
+COLOR_LEFT = COLORS["LEFT"]
+COLOR_MAIN = COLORS["MAIN"]
+COLOR_BOTTOM = COLORS["BOTTOM"]
+COLOR_BUTTON = COLORS["BUTTON"]
+COLOR_BUTTON_HOVER = COLORS["BUTTON_HOVER"]
+font = FONTS["main"]
+small_font = FONTS["small"]
+tiny_font = FONTS["tiny"]
 
 # -----------------------------------------------------
 # Logger
@@ -66,8 +65,11 @@ class TopBar:
 
     def draw(self, screen):
         pygame.draw.rect(screen, COLOR_TOP, (0, 0, self.width, self.height))
-        screen.blit(font.render("Prototype", True, COLOR_TEXT), (10, 5))
-        screen.blit(small_font.render(" / ".join(self.ui_manager.depth_path), True, COLOR_TEXT), (1000, 5))
+        screen.blit(font.render("Prototype", True, COLOR_TEXT), (3, 3))
+        # screen.blit(small_font.render(" / ".join(self.ui_manager.depth_path), True, COLOR_TEXT), (1000, 3))
+
+        path_text = " / ".join(self.ui_manager.depth_path)
+        screen.blit(tiny_font.render(path_text, True, COLOR_TEXT), (250, 5))
 
 # -----------------------------------------------------
 # SideMenu
@@ -85,11 +87,54 @@ class SideMenu:
 # BottomBar
 # -----------------------------------------------------
 class BottomBar:
-    def __init__(self, height):
+    def __init__(self, width, height, ui_manager):
+        self.width = width
         self.height = height
+        self.ui_manager = ui_manager
+
+        # 버튼들 초기화
+        self.buttons = []
+        self._create_buttons()
+
+    def _create_buttons(self):
+        """하단 바의 버튼 배치 정의"""
+        y = self.ui_manager.height - self.height + 5
+        x = 10
+        gap = 110  # 버튼 간격
+
+        # (버튼 이름, x좌표) 순으로 배치
+        button_labels = [
+            "Seat Temp (-)", "Seat Temp (+)",
+            "Heat ray", "Air Cond",
+            "Call", "Menu", "Navi",
+            "Remove WS Frost", "Remove Rear WS Frost",
+            "열선 온도 (-)", "열선 온도 (+)"
+        ]
+
+        for label in button_labels:
+            rect = pygame.Rect(x, y, 110, self.height - 10)
+            self.buttons.append({"label": label, "rect": rect})
+            x += gap
 
     def draw(self, screen):
-        pygame.draw.rect(screen, COLOR_BOTTOM, (0, HEIGHT - self.height, WIDTH, self.height))
+        # 하단 바 배경
+        y_pos = self.ui_manager.height - self.height
+        pygame.draw.rect(screen, COLOR_BOTTOM, (0, y_pos, self.width, self.height))
+
+        # 버튼 그리기
+        for btn in self.buttons:
+            pygame.draw.rect(screen, COLOR_BUTTON, btn["rect"], border_radius=8)
+            text = small_font.render(btn["label"], True, COLOR_TEXT)
+            text_rect = text.get_rect(center=btn["rect"].center)
+            screen.blit(text, text_rect)
+
+    def handle_event(self, event):
+        """마우스 클릭 처리 (필요 시)"""
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            for btn in self.buttons:
+                if btn["rect"].collidepoint(pos):
+                    print(f"'{btn['label']}' 버튼 클릭됨")
 
 # -----------------------------------------------------
 # ScreenBase
@@ -245,6 +290,9 @@ class UIModel:
     def __init__(self):
         self.logger = Logger(LOG_FILE)
         self.depth_path = ["Home"]
+        self.width = WIDTH
+        self.height = HEIGHT
+        self.margin = 10
         # 화면 객체 생성
         self.screens = {
             "Home": HomeScreen(self),
@@ -257,8 +305,11 @@ class UIModel:
         # UI 요소
         self.top_bar = TopBar(WIDTH, 30, self)
         self.side_menu = SideMenu(250, 30, 60)
-        self.bottom_bar = BottomBar(60)
-        self.back_button = Button("Back", (20, HEIGHT - 50, 100, 40), self.go_back)
+        self.bottom_bar = BottomBar(WIDTH, 30, self)
+        
+        btn_w, btn_h = 60, 25
+        self.back_button = Button("Back", (WIDTH - btn_w - self.margin, self.margin, btn_w, btn_h), self.go_back)
+
 
     def open_screen(self, name):
         if name in self.screens:
@@ -278,7 +329,7 @@ class UIModel:
 
         while running:
             mouse_pos = pygame.mouse.get_pos()
-            screen.fill(COLOR_MAIN)
+            screen.fill(COLORS["MAIN"])
 
             # UI 요소 그리기
             self.top_bar.draw(screen)

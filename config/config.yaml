@@ -1,0 +1,27 @@
+# config/config.yaml
+screen:
+  width: 1280
+  height: 720
+
+colors:
+  top: [40, 40, 40]
+  left: [20, 20, 20]
+  main: [30, 30, 50]
+  bottom: [50, 70, 100]
+  text: [255, 255, 255]
+  button: [80, 80, 80]
+  button_hover: [100, 100, 120]
+
+fonts:
+  main: 
+    name: "malgungothic"
+    size: 24
+  small:
+    name: "malgungothic"
+    size: 18
+  tiny:
+    name: "malgungothic"
+    size: 12
+
+log:
+  file: "interaction_log.csv"
