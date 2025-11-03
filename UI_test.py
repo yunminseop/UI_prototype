@@ -108,7 +108,7 @@ class BottomBar:
             "Heat ray", "Air Cond",
             "Call", "Menu", "Navi",
             "Remove WS Frost", "Remove Rear WS Frost",
-            "열선 온도 (-)", "열선 온도 (+)"
+            "heat ray (-)", "heat ray (+)"
         ]
 
         for label in button_labels:
