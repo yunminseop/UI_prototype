@@ -3,7 +3,11 @@ import pygame, sys, time
 from utils import (
     Logger, Button, TopBar, SidePanel, BottomBar,
     HomeScreen, QuickSettingsScreen, ChargingScreen,
-    AppsScreen, RadioScreen, MusicScreen, NavigationScreen
+    AppsScreen, RadioScreen, MusicScreen, NavigationScreen, 
+LightSettingsScreen,DrivingAssistScreen, LockSettingsScreen, SeatPositionScreen,
+ClimateScreen, NavigationSettingsScreen, GleoAIScreen, DisplaySettingsScreen,
+SecurityScreen,SoundScreen,ProfileScreen,ConvenienceScreen,ConnectivityScreen,
+AppsSettingsScreen, GeneralSettingsScreen, VehicleInfoScreen
 )
 
 class UIModel:
@@ -36,6 +40,27 @@ class UIModel:
             "Navigation": NavigationScreen(self),
         }
         self.current = self.screens["Home"]
+
+        self.screens.update({
+            "Quick Settings": QuickSettingsScreen(self),
+            "Light Setting": LightSettingsScreen(self),
+            "Assist Setting": DrivingAssistScreen(self),
+            "Lock Setting": LockSettingsScreen(self),
+            "Seat Position Setting": SeatPositionScreen(self),
+            "Climate Setting": ClimateScreen(self),
+            "Navigation Setting": NavigationSettingsScreen(self),
+            "Gleo AI": GleoAIScreen(self),
+            "Display Setting": DisplaySettingsScreen(self),
+            "Sec Setting": SecurityScreen(self),
+            "Sound Setting": SoundScreen(self),
+            "Profile Setting": ProfileScreen(self),
+            "Conv Setting": ConvenienceScreen(self),
+            "Connectivity Setting": ConnectivityScreen(self),
+            "App Setting": AppsSettingsScreen(self),
+            "General Setting": GeneralSettingsScreen(self),
+            "Vehicle Info": VehicleInfoScreen(self),
+        })
+
 
     # 네비게이션
     def open_screen(self, name):
