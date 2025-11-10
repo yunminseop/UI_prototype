@@ -1,5 +1,6 @@
 import yaml
 import pygame
+import os
 
 def load_config(path="config/config.yaml"):
     with open(path, "r", encoding="utf-8") as f:
@@ -22,13 +23,28 @@ def init_from_config(config):
         "BUTTON_HOVER": tuple(config["colors"]["button_hover"]),
     }
 
-    # 폰트
     pygame.font.init()
-    font_cfg = config["fonts"]
+
+    # 폰트 파일 경로 설정
+    font_path = os.path.join("assets", "NanumGothic.ttf")
+
+    # 폰트 존재 여부 확인
+    if os.path.exists(font_path):
+        main_font = pygame.font.Font(font_path, config["fonts"]["main"]["size"])
+        small_font = pygame.font.Font(font_path, config["fonts"]["small"]["size"])
+        tiny_font = pygame.font.Font(font_path, config["fonts"]["tiny"]["size"])
+    else:
+        print("[Warning] NanumGothic.ttf 폰트를 찾을 수 없습니다. 시스템 폰트로 대체합니다.")
+        # fallback: 시스템 내 한글 지원 폰트 탐색
+        fallback_font_name = pygame.font.match_font(['NotoSansCJKkr', 'NanumGothic', 'malgun'])
+        main_font = pygame.font.Font(fallback_font_name, config["fonts"]["main"]["size"])
+        small_font = pygame.font.Font(fallback_font_name, config["fonts"]["small"]["size"])
+        tiny_font = pygame.font.Font(fallback_font_name, config["fonts"]["tiny"]["size"])
+
     FONTS = {
-        "main": pygame.font.SysFont(font_cfg["main"]["name"], font_cfg["main"]["size"]),
-        "small": pygame.font.SysFont(font_cfg["small"]["name"], font_cfg["small"]["size"]),
-        "tiny": pygame.font.SysFont(font_cfg["tiny"]["name"], font_cfg["tiny"]["size"]),
+        "main": main_font,
+        "small": small_font,
+        "tiny": tiny_font,
     }
 
     # 로그 파일 경로
