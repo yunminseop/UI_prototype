@@ -1,27 +1,20 @@
-# config/config.yaml
 screen:
   width: 1280
   height: 720
 
 colors:
-  top: [40, 40, 40]
-  left: [20, 20, 20]
-  main: [30, 30, 50]
-  bottom: [50, 70, 100]
-  text: [255, 255, 255]
-  button: [80, 80, 80]
-  button_hover: [100, 100, 120]
+  top:    [245, 245, 247]
+  left:   [250, 250, 252]
+  main:   [255, 255, 255]
+  bottom: [245, 245, 247]
+  text:   [30, 30, 30]
+  button: [232, 235, 240]
+  button_hover: [215, 220, 230]
 
 fonts:
-  main: 
-    name: "malgungothic"
-    size: 24
-  small:
-    name: "malgungothic"
-    size: 18
-  tiny:
-    name: "malgungothic"
-    size: 12
+  main:  { name: "Malgun Gothic", size: 22 }
+  small: { name: "Malgun Gothic", size: 18 }
+  tiny:  { name: "Malgun Gothic", size: 14 }
 
 log:
-  file: "interaction_log.csv"
+  file: "logs/ui_interactions.csv"
