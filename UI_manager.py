@@ -15,9 +15,10 @@ class UIModel:
         self.width, self.height = width, height
         self.colors, self.fonts = colors, fonts
         self.font, self.small_font, self.tiny_font = fonts["main"], fonts["small"], fonts["tiny"]
+        self.current_profile = None
 
         # 상태값(상단바 표시용)
-        self.vehicle_state = dict(gear="P", soc=1.0, range_km=408)
+        self.vehicle_state = dict(gear="P", soc=1.0, range_km=400)
 
         # 공용 구성요소
         self.logger = Logger(log_file)
@@ -64,15 +65,15 @@ class UIModel:
 
     # 네비게이션
     def open_screen(self, name):
-    # 1️⃣ 존재하지 않으면 무시
+    # 존재하지 않으면 무시
         if name not in self.screens:
             return
 
-        # 2️⃣ 현재 화면과 같으면 이동하지 않음
+        # 현재 화면과 같으면 이동하지 않음
         if self.depth_path and self.depth_path[-1] == name:
             return
 
-        # 3️⃣ 하단 바에서 'Home' 또는 최상위 메뉴로 진입 시, 상위 경로 초기화
+        # 하단 바에서 'Home' 또는 최상위 메뉴로 진입 시, 상위 경로 초기화
         top_level = {"Quick Settings", "Navigation", "Apps", "Radio", "Music"}
         if name in top_level:
             self.depth_path = ["Home"]  # Home 기준으로 초기화
@@ -81,7 +82,7 @@ class UIModel:
             # 일반적인 경우 (계층 이동)
             self.depth_path.append(name)
 
-        # 4️⃣ 실제 화면 전환
+        # 실제 화면 전환
         self.current = self.screens[name]
 
 
@@ -122,13 +123,13 @@ class UIModel:
                             b.is_pressed = True
 
                 elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
-                    handled = False  # ✅ 클릭이 처리되었는지 추적
+                    handled = False  #  클릭이 처리되었는지 추적
 
                     for b in self.bottom.buttons + [self.back_btn]:
                         if b.is_pressed:
                             b.is_pressed = False
                             if b.check_click(e.pos):
-                                handled = True  # ✅ 클릭 처리됨
+                                handled = True  #  클릭 처리됨
                                 if b == self.back_btn:
                                     self.go_back()
                                     self.logger.log(self.depth_path, "Back", e.pos, len(self.depth_path))
@@ -138,7 +139,7 @@ class UIModel:
                                         self.logger.log(self.depth_path, b.text, e.pos, len(self.depth_path))
                             break  # 버튼 클릭 루프 탈출
 
-                    # ✅ Back/하단바 버튼 외에는 현재 화면의 on_click()으로 전달
+                    #  Back/하단바 버튼 외에는 현재 화면의 on_click()으로 전달
                     if not handled and hasattr(self.current, "on_click"):
                         self.current.on_click(e.pos)
 
