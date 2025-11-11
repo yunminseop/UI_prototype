@@ -34,8 +34,7 @@ def init_from_config(config):
         small_font = pygame.font.Font(font_path, config["fonts"]["small"]["size"])
         tiny_font = pygame.font.Font(font_path, config["fonts"]["tiny"]["size"])
     else:
-        print("[Warning] NanumGothic.ttf 폰트를 찾을 수 없습니다. 시스템 폰트로 대체합니다.")
-        # fallback: 시스템 내 한글 지원 폰트 탐색
+        
         fallback_font_name = pygame.font.match_font(['NotoSansCJKkr', 'NanumGothic', 'malgun'])
         main_font = pygame.font.Font(fallback_font_name, config["fonts"]["main"]["size"])
         small_font = pygame.font.Font(fallback_font_name, config["fonts"]["small"]["size"])
