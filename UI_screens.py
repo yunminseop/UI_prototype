@@ -217,7 +217,7 @@ class QuickSettingsScreen(ScreenBase):
             # 우측 타일
             for rect, label in self.grid:
                 active = self.status[label]
-                color = (255, 255, 255) if active else (230, 230, 230)
+                color = (150, 255, 150) if active else (230, 230, 230)
                 pygame.draw.rect(screen, color, rect, border_radius=12)
                 s = self.ui.small_font.render(label, True, (40, 40, 40))
                 screen.blit(s, (rect.x + 16, rect.y + 10))
@@ -232,7 +232,7 @@ class QuickSettingsScreen(ScreenBase):
             self.light_rects = []
             for i, name in enumerate(self.light_modes):
                 r = pygame.Rect(x0 + i * 90, y0, 80, 36)
-                color = (0, 165, 255) if name == self.selected_light else (230, 230, 230)
+                color = (150, 255, 150) if name == self.selected_light else (230, 230, 230)
                 pygame.draw.rect(screen, color, r, border_radius=10)
                 t = self.ui.tiny_font.render(name, True, (30, 30, 30))
                 screen.blit(t, t.get_rect(center=r.center))
@@ -243,7 +243,7 @@ class QuickSettingsScreen(ScreenBase):
             self.wiper_rects = []
             for i, name in enumerate(self.wiper_modes):
                 r = pygame.Rect(x0 + i * 90, y0, 80, 36)
-                color = (0, 165, 255) if name == self.selected_wiper else (230, 230, 230)
+                color = (150, 255, 150) if name == self.selected_wiper else (230, 230, 230)
                 pygame.draw.rect(screen, color, r, border_radius=10)
                 t = self.ui.tiny_font.render(name, True, (30, 30, 30))
                 screen.blit(t, t.get_rect(center=r.center))
@@ -330,7 +330,7 @@ class LightSettingsScreen(ScreenBase):
 
         for i, mode in enumerate(self.light_modes):
             rect = pygame.Rect(base_x + i * (w + gap), base_y, w, h)
-            color = (0, 165, 255) if self.selected_mode == mode else (230, 230, 230)
+            color = (150, 255, 150) if self.selected_mode == mode else (230, 230, 230)
             pygame.draw.rect(screen, color, rect, border_radius=10)
             txt = self.ui.small_font.render(mode, True, (25, 25, 25))
             screen.blit(txt, txt.get_rect(center=rect.center))
@@ -342,7 +342,7 @@ class LightSettingsScreen(ScreenBase):
         screen.blit(label, (area.x + 20, y))
         toggle_rect = pygame.Rect(area.x + 260, y - 5, 50, 26)
         self.toggles["steering"] = toggle_rect
-        color_bg = (120, 200, 80) if self.steering_button_light else (180, 180, 180)
+        color_bg = (150, 255, 150) if self.steering_button_light else (180, 180, 180)
         knob_x = toggle_rect.x + (28 if self.steering_button_light else 2)
         pygame.draw.rect(screen, color_bg, toggle_rect, border_radius=13)
         pygame.draw.circle(screen, (255, 255, 255),
@@ -361,7 +361,7 @@ class LightSettingsScreen(ScreenBase):
 
             # 채움 영역 + 손잡이
             fill_w = int(bar_rect.width * val)
-            pygame.draw.rect(screen, (0, 165, 255),
+            pygame.draw.rect(screen, (150, 255, 150),
                              (bar_rect.x, bar_rect.y, fill_w, bar_rect.height),
                              border_radius=4)
             pygame.draw.rect(screen, (210, 210, 210),
@@ -399,7 +399,7 @@ class LightSettingsScreen(ScreenBase):
         screen.blit(label, (x, y))
         toggle_rect = pygame.Rect(x + 240, y - 5, 50, 26)
         self.toggles[key] = toggle_rect
-        color_bg = (120, 200, 80) if state else (180, 180, 180)
+        color_bg = (150, 255, 150) if state else (180, 180, 180)
         knob_x = toggle_rect.x + (28 if state else 2)
         pygame.draw.rect(screen, color_bg, toggle_rect, border_radius=13)
         pygame.draw.circle(screen, (255, 255, 255),
@@ -575,7 +575,7 @@ class DrivingAssistScreen(ScreenBase):
 
         # --- 주행모드 버튼 ---
         for b in self.mode_buttons:
-            color = (200, 220, 255) if b.text == self.selected_mode else (235, 235, 235)
+            color = (150, 255, 150) if b.text == self.selected_mode else (235, 235, 235)
             pygame.draw.rect(screen, color, b.rect, border_radius=10)
             label = self.ui.small_font.render(b.text, True, (30, 30, 30))
             screen.blit(label, label.get_rect(center=b.rect.center))
@@ -586,7 +586,7 @@ class DrivingAssistScreen(ScreenBase):
 
         # --- 충돌민감도 버튼 ---
         for b in self.sens_buttons:
-            color = (200, 220, 255) if b.text == self.selected_sens else (235, 235, 235)
+            color = (150, 255, 150) if b.text == self.selected_sens else (235, 235, 235)
             pygame.draw.rect(screen, color, b.rect, border_radius=8)
             label = self.ui.small_font.render(b.text, True, (30, 30, 30))
             screen.blit(label, label.get_rect(center=b.rect.center))
@@ -680,15 +680,21 @@ class LockSettingsScreen(ScreenBase):
         # 스위치
         w, h = 56, 30
         rect = pygame.Rect(control_x, y - 3, w, h)
-        pygame.draw.rect(screen, (200, 200, 200), rect, border_radius=15)
+        
         knob_r = h // 2 - 3
         knob_x = rect.left + knob_r + 3 if not active else rect.right - knob_r - 3
-        knob_color = (150, 150, 150) if not active else (0, 165, 255)
-        pygame.draw.circle(screen, knob_color, (knob_x, rect.centery), knob_r)
-
+        knob_color = (255, 255, 255)
+        # pygame.draw.circle(screen, knob_color, (knob_x, rect.centery), knob_r)
+        
         # 상태 텍스트
         st = self.small_font.render("ON" if active else "OFF", True, (70, 70, 70))
         screen.blit(st, (rect.right + 10, rect.y + 4))
+        if active:
+            pygame.draw.rect(screen, (150, 255, 150), rect, border_radius=15)
+            pygame.draw.circle(screen, knob_color, (knob_x, rect.centery), knob_r)
+        else:
+            pygame.draw.rect(screen, (180, 180, 180), rect, border_radius=15)
+            pygame.draw.circle(screen, knob_color, (knob_x, rect.centery), knob_r)
 
         # 클릭용 저장
         self.toggle_hitboxes[key] = rect
@@ -718,7 +724,7 @@ class LockSettingsScreen(ScreenBase):
         bw, bh, rgap = 140, 50, 10
         for i, btn in enumerate(self.unlock_radio_btns):
             btn.rect.update(control_x + i * (bw + rgap), y, bw, bh)
-            color = (0, 165, 255) if btn.text == self.selected_unlock else (230, 230, 230)
+            color = (150, 255, 150) if btn.text == self.selected_unlock else (230, 230, 230)
             pygame.draw.rect(screen, color, btn.rect, border_radius=10)
             t = self.small_font.render(btn.text, True, (255, 255, 255) if btn.text == self.selected_unlock else (40, 40, 40))
             screen.blit(t, t.get_rect(center=btn.rect.center))
@@ -738,7 +744,7 @@ class LockSettingsScreen(ScreenBase):
 
         for i, btn in enumerate(self.lock_radio_btns):
             btn.rect.update(control_x + i * (bw + rgap), y, bw, bh)
-            color = (0, 165, 255) if btn.text == self.selected_lock else (230, 230, 230)
+            color = (150, 255, 150) if btn.text == self.selected_lock else (230, 230, 230)
             pygame.draw.rect(screen, color, btn.rect, border_radius=10)
             t = self.small_font.render(btn.text, True, (255, 255, 255) if btn.text == self.selected_lock else (40, 40, 40))
             screen.blit(t, t.get_rect(center=btn.rect.center))
@@ -841,7 +847,7 @@ class SeatPositionScreen(ScreenBase):
         screen.blit(title, (area.x + 16, area.y + 12))
 
         # --- 이지 엑세스 토글 버튼 표시 ---
-        toggle_color = (180, 220, 180) if self.easy_access else (230, 230, 230)
+        toggle_color = (150, 255, 150) if self.easy_access else (230, 230, 230)
         pygame.draw.rect(screen, toggle_color, self.toggle_button.rect, border_radius=10)
         label = self.ui.small_font.render(
             f"이지 엑세스 ({'On' if self.easy_access else 'Off'})", True, (30, 30, 30)
@@ -855,7 +861,7 @@ class SeatPositionScreen(ScreenBase):
         # --- 프리셋 버튼들 ---
         for b in self.preset_buttons:
             is_selected = (b.text == self.selected_preset)
-            color = (200, 220, 255) if is_selected else (235, 235, 235)
+            color = (150, 255, 150) if is_selected else (235, 235, 235)
             pygame.draw.rect(screen, color, b.rect, border_radius=10)
             label = self.ui.small_font.render(b.text, True, (30, 30, 30))
             screen.blit(label, label.get_rect(center=b.rect.center))
@@ -965,7 +971,7 @@ class ClimateScreen(ScreenBase):
         for group_name, b in self.toggle_buttons:
             name = b.text
             is_on = self.groups[group_name][name]
-            color = (180, 220, 180) if is_on else (230, 230, 230)
+            color = (150, 255, 150) if is_on else (230, 230, 230)
             pygame.draw.rect(screen, color, b.rect, border_radius=10)
             label = self.ui.small_font.render(f"{name} ({'On' if is_on else 'Off'})", True, (30, 30, 30))
             screen.blit(label, label.get_rect(center=b.rect.center))
@@ -1036,7 +1042,7 @@ class ChargingScreen(ScreenBase):
         # --- 게이지 ---
         bar = pygame.Rect(area.x + 10, area.y + 60, area.w - 20, 40)
         fill = bar.copy(); fill.width = int(bar.width * 0.9)
-        pygame.draw.rect(screen, (110, 210, 120), fill, border_radius=10)
+        pygame.draw.rect(screen, (150, 255, 150), fill, border_radius=10)
         pygame.draw.rect(screen, (200, 200, 200), bar, 2, border_radius=10)
         gauge_txt = self.ui.small_font.render("충전 한도: 100%", True, (30, 30, 30))
         screen.blit(gauge_txt, (area.x + 15, area.y + 110))
@@ -1067,8 +1073,8 @@ class ChargingScreen(ScreenBase):
         self._km_rect = pygame.Rect(area.x + 150, area.y + 220, 70, 35)
         self._pct_rect = pygame.Rect(area.x + 230, area.y + 220, 70, 35)
 
-        km_color = (170, 210, 255) if self.display_mode == "km" else (235, 235, 235)
-        pct_color = (170, 210, 255) if self.display_mode == "%" else (235, 235, 235)
+        km_color = (150, 255, 150) if self.display_mode == "km" else (235, 235, 235)
+        pct_color = (150, 255, 150) if self.display_mode == "%" else (235, 235, 235)
 
         pygame.draw.rect(screen, km_color, self._km_rect, border_radius=8)
         pygame.draw.rect(screen, pct_color, self._pct_rect, border_radius=8)
@@ -1168,7 +1174,7 @@ class NavigationSettingsScreen(ScreenBase):
         # 더보기 버튼
         self.buttons.append(
             Button("더보기", (x, y, bw, bh),
-                   lambda: print("⚙ 더보기 버튼 클릭됨"),
+                   lambda: print("Clicked: more"),
                    self.small_font, self.colors)
         )
 
@@ -1202,7 +1208,7 @@ class NavigationSettingsScreen(ScreenBase):
             label = btn.text
             if label in self.toggle_states:
                 active = self.toggle_states[label]
-                color = (0, 165, 255) if active else (200, 200, 200)
+                color = (150, 255, 150) if active else (200, 200, 200)
                 pygame.draw.rect(screen, color, btn.rect, border_radius=8)
                 txt = self.small_font.render(label, True, (20, 20, 20))
                 screen.blit(txt, txt.get_rect(center=btn.rect.center))
@@ -1296,38 +1302,43 @@ class GleoAIScreen(ScreenBase):
         # 제목
         screen.blit(self.font.render("Gleo AI", True, (30, 30, 30)), (area.x + 20, area.y + 10))
 
-        # === 1️⃣ 음성 유형 ===
+        # === 음성 유형 ===
         label_voice_y = self.voice_buttons[0].rect.y - 28  # ← 버튼보다 위쪽
         screen.blit(self.small_font.render("음성 유형", True, (30, 30, 30)),
                     (area.x + 20, label_voice_y))
         for btn in self.voice_buttons:
-            color = (0, 165, 255) if btn.text == self.selected_voice else (220, 220, 220)
+            color = (150, 255, 150) if btn.text == self.selected_voice else (220, 220, 220)
             pygame.draw.rect(screen, color, btn.rect, border_radius=8)
             screen.blit(self.small_font.render(btn.text, True, (25, 25, 25)),
                         self.small_font.render(btn.text, True, (25, 25, 25)).get_rect(center=btn.rect.center))
 
-        # === 2️⃣ 대화 스타일 ===
+        # === 대화 스타일 ===
         label_style_y = self.style_buttons[0].rect.y - 28
         screen.blit(self.small_font.render("대화 스타일", True, (30, 30, 30)),
                     (area.x + 20, label_style_y))
         for btn in self.style_buttons:
-            color = (0, 165, 255) if btn.text == self.selected_style else (220, 220, 220)
+            color = (150, 255, 150) if btn.text == self.selected_style else (220, 220, 220)
             pygame.draw.rect(screen, color, btn.rect, border_radius=8)
             screen.blit(self.small_font.render(btn.text, True, (25, 25, 25)),
                         self.small_font.render(btn.text, True, (25, 25, 25)).get_rect(center=btn.rect.center))
 
-        # === 3️⃣ 호출 방법 ===
+        # === 호출 방법 ===
         label_call_y = self.call_toggle_rect.y - 30
         screen.blit(self.small_font.render("호출 방법", True, (30, 30, 30)),
                     (area.x + 20, label_call_y))
 
         # 토글
         toggle_rect = self.call_toggle_rect
-        pygame.draw.rect(screen, (200, 200, 200), toggle_rect, border_radius=15)
         knob_radius = toggle_rect.height // 2 - 2
         knob_x = toggle_rect.left + knob_radius + 2 if not self.call_toggle else toggle_rect.right - knob_radius - 2
-        knob_color = (150, 150, 150) if not self.call_toggle else (0, 165, 255)
-        pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
+        knob_color = (255, 255, 255)
+
+        if self.call_toggle:
+            pygame.draw.rect(screen, (150, 255, 150), toggle_rect, border_radius=15)
+            pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
+        else:
+            pygame.draw.rect(screen, (180, 180, 180), toggle_rect, border_radius=15)
+            pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
 
         # 오른쪽 텍스트
         screen.blit(self.small_font.render("'글레오'라고 부르기", True, (40, 40, 40)),
@@ -1398,7 +1409,7 @@ class DisplaySettingsScreen(ScreenBase):
                     (area.x + 20, y_label))
 
         for t, rect in self.theme_buttons:
-            color = (0, 165, 255) if t == self.selected_theme else (225, 225, 225)
+            color = (150, 255, 150) if t == self.selected_theme else (225, 225, 225)
             pygame.draw.rect(screen, color, rect, border_radius=12)
             txt = self.small_font.render(t, True, (25, 25, 25))
             screen.blit(txt, txt.get_rect(center=rect.center))
@@ -1415,7 +1426,7 @@ class DisplaySettingsScreen(ScreenBase):
 
         pygame.draw.rect(screen, (210, 210, 210), self.slider_rect, border_radius=4)
         fill_w = int(self.slider_rect.width * self.brightness)
-        pygame.draw.rect(screen, (0, 165, 255),
+        pygame.draw.rect(screen, (150, 255, 150),
                          (slider_x, slider_y, fill_w, slider_h), border_radius=4)
 
         knob_x = slider_x + fill_w
@@ -1521,17 +1532,17 @@ class SecurityScreen(ScreenBase):
     def select_mode(self, name):
         self.selected_mode = name
         self.ui.logger.log(self.ui.depth_path, f"RecordMode: {name}", pygame.mouse.get_pos(), len(self.ui.depth_path))
-        print(f"[Security] 모드 변경 → {name}")
+        print(f"[Clicked: {name}")
 
     def toggle_onhook(self):
         self.onhook_enabled = not self.onhook_enabled
         state = "ON" if self.onhook_enabled else "OFF"
         self.ui.logger.log(self.ui.depth_path, f"OnHook: {state}", pygame.mouse.get_pos(), len(self.ui.depth_path))
-        print(f"[Security] 온후크 {state}")
+        print(f"Clicked: {state}")
 
     def log_action(self, name):
         self.ui.logger.log(self.ui.depth_path, f"Action: {name}", pygame.mouse.get_pos(), len(self.ui.depth_path))
-        print(f"[Security] 실행 → {name}")
+        print(f"Clicked: {name}")
 
     # -------------------------------------------------
     def draw(self, screen, mouse_pos):
@@ -1549,7 +1560,7 @@ class SecurityScreen(ScreenBase):
         label_y = area.y + 70
         screen.blit(self.small_font.render("녹화 모드", True, (30, 30, 30)), (area.x + 20, label_y))
         for btn in self.mode_buttons:
-            color = (0, 165, 255) if btn.text == self.selected_mode else (225, 225, 225)
+            color = (150, 255, 150) if btn.text == self.selected_mode else (225, 225, 225)
             pygame.draw.rect(screen, color, btn.rect, border_radius=10)
             txt = self.small_font.render(btn.text, True, (25, 25, 25))
             screen.blit(txt, txt.get_rect(center=btn.rect.center))
@@ -1558,13 +1569,18 @@ class SecurityScreen(ScreenBase):
         toggle_label_x = self.onhook_rect.right + 10
         toggle_label_y = self.onhook_rect.y + 5
         screen.blit(self.small_font.render("온후크", True, (40, 40, 40)), (toggle_label_x, toggle_label_y))
-
         toggle_rect = self.onhook_rect
-        pygame.draw.rect(screen, (200, 200, 200), toggle_rect, border_radius=15)
         knob_radius = toggle_rect.height // 2 - 2
         knob_x = toggle_rect.left + knob_radius + 2 if not self.onhook_enabled else toggle_rect.right - knob_radius - 2
-        knob_color = (150, 150, 150) if not self.onhook_enabled else (0, 165, 255)
-        pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
+        knob_color = (255, 255, 255)
+        
+
+        if self.onhook_enabled:
+            pygame.draw.rect(screen, (150, 255, 150), toggle_rect, border_radius=15)
+            pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
+        else:
+            pygame.draw.rect(screen, (180, 180, 180), toggle_rect, border_radius=15)
+            pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
 
         # === 3️⃣ 하단 기능 버튼 ===
         for btn in self.action_buttons:
@@ -1653,7 +1669,7 @@ class SoundScreen(ScreenBase):
 
         for m in self.modes:
             rect = pygame.Rect(x, y_btn, bw, bh)
-            color = (0, 165, 255) if m == self.selected_mode else (230, 230, 230)
+            color = (150, 255, 150) if m == self.selected_mode else (230, 230, 230)
             pygame.draw.rect(screen, color, rect, border_radius=10)
             txt = self.small_font.render(
                 m, True, (255, 255, 255) if m == self.selected_mode else (40, 40, 40)
@@ -1682,7 +1698,7 @@ class SoundScreen(ScreenBase):
             slider_rect = pygame.Rect(slider_x, y, slider_w, slider_h)
             pygame.draw.rect(screen, (210, 210, 210), slider_rect, border_radius=4)
             fill_w = int(slider_w * val)
-            pygame.draw.rect(screen, (0, 165, 255), (slider_x, y, fill_w, slider_h), border_radius=4)
+            pygame.draw.rect(screen, (150, 255, 150), (slider_x, y, fill_w, slider_h), border_radius=4)
 
             # 노브
             knob_x = slider_x + fill_w
@@ -1773,7 +1789,7 @@ class ProfileScreen(ScreenBase):
     def _add_profile(self):
         if self.text_input.strip():
             # 기존: self.current_profile = self.text_input.strip()
-            self.ui.current_profile = self.text_input.strip()  # ✅ 전역 상태로 저장
+            self.ui.current_profile = self.text_input.strip()  # 전역 상태로 저장
             self.ui.logger.log(
                 self.ui.depth_path,
                 f"ProfileAdded: {self.ui.current_profile}",
@@ -1823,14 +1839,9 @@ class ProfileScreen(ScreenBase):
         screen.blit(txt, (input_rect.x + 10, input_rect.y + 15))
 
         # 버튼
-        pygame.draw.rect(screen, (0, 165, 255), add_btn_rect, border_radius=10)
-        t = self.small_font.render("프로필 추가", True, (255, 255, 255))
+        pygame.draw.rect(screen, (230, 230, 230), add_btn_rect, border_radius=10)
+        t = self.small_font.render("프로필 추가", True, (0, 0, 0))
         screen.blit(t, t.get_rect(center=add_btn_rect.center))
-
-        # # --- 상단바 오른쪽에 현재 프로필 표시 ---
-        # if self.ui.current_profile:
-        #     text = self.small_font.render(self.ui.current_profile, True, (40, 40, 40))
-        #     screen.blit(text, (self.ui.width - text.get_width() - 240, 10))
 
         # --- 제어 섹션 ---
         y = area.y + 180
@@ -1842,7 +1853,7 @@ class ProfileScreen(ScreenBase):
         for name in self.controls:
             rect = pygame.Rect(area.x + 40, y, 220, 45)
 
-            # ✅ Hover 감지
+            # Hover 감지
             hovered = rect.collidepoint(mouse_pos)
             base_color = (230, 230, 230)
             hover_color = (210, 215, 225)
@@ -2034,12 +2045,12 @@ class ConvenienceScreen(ScreenBase):
             btn_rect = pygame.Rect(card.right - 90, card.bottom - 45, 70, 32)
             active = self.modes[name]
             hover = btn_rect.collidepoint(mouse_pos)
-            base_color = (0, 165, 255) if active else (200, 200, 200)
-            hover_color = (0, 145, 230) if active else (170, 170, 170)
+            base_color = (150, 255, 150) if active else (200, 200, 200)
+            hover_color = (150, 255, 150) if active else (180, 180, 180)
             color = hover_color if hover else base_color
 
             pygame.draw.rect(screen, color, btn_rect, border_radius=8)
-            txt = self.ui.tiny_font.render("끄기" if active else "켜기", True, (255, 255, 255))
+            txt = self.ui.tiny_font.render("끄기" if active else "켜기", True, (20, 20, 20))
             screen.blit(txt, txt.get_rect(center=btn_rect.center))
 
             self.card_buttons[name] = btn_rect
@@ -2096,7 +2107,7 @@ class ConnectivityScreen(ScreenBase):
             self.toggle_rects[name] = toggle_rect
 
             # 토글 색상
-            color_bg = (120, 200, 80) if state else (180, 180, 180)
+            color_bg = (150, 255, 150) if state else (180, 180, 180)
             knob_x = toggle_rect.x + (28 if state else 2)
 
             # 토글 그리기
@@ -2218,7 +2229,7 @@ class GeneralSettingsScreen(ScreenBase):
         toggle_rect = pygame.Rect(area.x + 200, area.y + 55, 50, 26)
         self.toggle_rect = toggle_rect
 
-        color_bg = (120, 200, 80) if self.show_subspeed else (180, 180, 180)
+        color_bg = (150, 255, 150) if self.show_subspeed else (180, 180, 180)
         knob_x = toggle_rect.x + (28 if self.show_subspeed else 2)
         pygame.draw.rect(screen, color_bg, toggle_rect, border_radius=13)
         pygame.draw.circle(screen, (255, 255, 255),
@@ -2244,7 +2255,7 @@ class GeneralSettingsScreen(ScreenBase):
             for opt in options:
                 rect = pygame.Rect(btn_x, y - 4, btn_w, btn_h)
                 is_selected = (self.selected_units[category] == opt)
-                color = (0, 165, 255) if is_selected else (230, 230, 230)
+                color = (150, 255, 150) if is_selected else (230, 230, 230)
                 pygame.draw.rect(screen, color, rect, border_radius=10)
 
                 text = self.ui.tiny_font.render(opt, True, (0, 0, 0))
@@ -2312,7 +2323,7 @@ class VehicleInfoScreen(ScreenBase):
         toggle_rect = pygame.Rect(area.x + 280, y - 2, 50, 26)
         self.toggle_rect = toggle_rect
 
-        color_bg = (120, 200, 80) if self.auto_update else (180, 180, 180)
+        color_bg = (150, 255, 150) if self.auto_update else (180, 180, 180)
         knob_x = toggle_rect.x + (28 if self.auto_update else 2)
         pygame.draw.rect(screen, color_bg, toggle_rect, border_radius=13)
         pygame.draw.circle(screen, (255, 255, 255),
