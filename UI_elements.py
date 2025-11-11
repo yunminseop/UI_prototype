@@ -25,7 +25,7 @@ class Logger:
             os.makedirs(dir_path, exist_ok=True)
         with open(self.file, "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(["Time(UNIX)", "Path", "Target", "Pos(x,y)", "Depth"])
+            w.writerow(["Timestamp", "Path", "Target", "Pos", "Depth"])
 
     def log(self, path_list, target, pos, depth: int):
         now_unix = time.time()  # UNIX timestamp

@@ -2403,9 +2403,252 @@ class MusicScreen(SimpleListScreen):
     def __init__(self, ui):
         super().__init__("Music", ui, ["Bluetooth", "USB", "Streaming"])
 
-class NavigationScreen(SimpleListScreen):
+# ------------------------------
+# 내비게이션 메인 화면
+# ------------------------------
+class NavigationScreen(ScreenBase):
     def __init__(self, ui):
-        super().__init__("Navigation", ui, ["Destination", "즐겨찾기", "최근 목적지"])
+        super().__init__("Navigation", ui)
+        self.sub_screen = None
+        self.font = ui.font
+        self.colors = ui.colors
+        self._init_buttons()
+
+    def _init_buttons(self):
+        # 버튼 생성
+        names = ["Destination", "즐겨찾기", "최근 목적지"]
+        x, y = self.ui.side.width + 100, 200
+        w, h, gap = 280, 60, 80
+
+        for name in names:
+            rect = (x, y, w, h)
+            btn = Button(name, rect, action=lambda n=name: self._enter_subscreen(n),
+                         font=self.font, colors=self.colors)
+            self.buttons.append(btn)
+            y += gap
+
+    def _enter_subscreen(self, name):
+        if name == "Destination":
+            self.sub_screen = DestinationScreen(self.ui)
+        elif name == "즐겨찾기":
+            self.sub_screen = FavoritesScreen(self.ui)
+        elif name == "최근 목적지":
+            self.sub_screen = RecentScreen(self.ui)
+
+    def draw(self, screen, mouse_pos):
+        if self.sub_screen:
+            self.sub_screen.draw(screen, mouse_pos)
+            return
+
+        # 배경
+        left_w = self.ui.side.width
+        pygame.draw.rect(screen, (245, 245, 245),
+                         (left_w + 20, 70, self.ui.width - left_w - 40,
+                          self.ui.height - self.ui.bottom.h - 90),
+                         border_radius=14)
+
+        title = self.font.render("Navigation", True, (30, 30, 30))
+        screen.blit(title, (left_w + 50, 100))
+
+        # 버튼 그리기 (hover 반응 포함)
+        for btn in self.buttons:
+            btn.draw(screen, mouse_pos)
+
+    def handle_event(self, event):
+        if self.sub_screen:
+            self.sub_screen.handle_event(event)
+            return
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            pos = event.pos
+            for btn in self.buttons:
+                if btn.check_click(pos):
+                    btn.trigger(self.ui, pos)
+                    return
+
+
+# ------------------------------
+# Destination: 목적지 검색 입력창 + 키보드
+# ------------------------------
+class DestinationScreen(ScreenBase):
+    def __init__(self, ui):
+        super().__init__("Destination Search", ui)
+        self.font = ui.font
+        self.small_font = ui.small_font
+        self.text_input = ""
+        self.keyboard_visible = True
+
+        # 키보드 구성
+        self.keys = [
+            list("QWERTYUIOP"),
+            list("ASDFGHJKL"),
+            list("ZXCVBNM"),
+        ]
+        self.special_keys = ["Space", "Back", "Enter"]
+        self.key_buttons = []
+
+    def draw(self, screen, mouse_pos):
+        left_w = self.ui.side.width
+        area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40, self.ui.height - self.ui.bottom.h - 90)
+        pygame.draw.rect(screen, (245, 245, 245), area, border_radius=14)
+
+        title = self.font.render("목적지 검색", True, (30, 30, 30))
+        screen.blit(title, (area.x + 20, area.y + 10))
+
+        # 검색 입력창
+        input_rect = pygame.Rect(area.x + 30, area.y + 70, 400, 60)
+        pygame.draw.rect(screen, (255, 255, 255), input_rect, border_radius=10)
+        pygame.draw.rect(screen, (200, 200, 200), input_rect, 2, border_radius=10)
+        text = self.small_font.render(self.text_input or "검색어를 입력하세요...", True, (50, 50, 50))
+        screen.blit(text, (input_rect.x + 10, input_rect.y + 20))
+
+        # 결과 표시 (Enter 누르면 간단히 '검색 완료' 메시지만)
+        if not self.keyboard_visible:
+            msg = self.small_font.render(f"'{self.text_input}' 검색 완료", True, (70, 70, 70))
+            screen.blit(msg, (area.x + 30, area.y + 160))
+
+        # 가상 키보드
+        if self.keyboard_visible:
+            self._draw_keyboard(screen)
+
+        # # 뒤로가기 버튼
+        # back_btn = pygame.Rect(area.right - 150, area.y + 20, 120, 40)
+        # pygame.draw.rect(screen, (230, 230, 230), back_btn, border_radius=10)
+        # t = self.small_font.render("뒤로가기", True, (0, 0, 0))
+        # screen.blit(t, t.get_rect(center=back_btn.center))
+        # self.back_btn = back_btn
+
+    def _draw_keyboard(self, screen):
+        kb_height = 250
+        kb_y = self.ui.height - kb_height - self.ui.bottom.h
+        pygame.draw.rect(screen, (235, 235, 235), (0, kb_y, self.ui.width, kb_height))
+
+        key_w, key_h, gap = 60, 50, 10
+        start_x = 100
+        y = kb_y + 20
+        self.key_buttons.clear()
+
+        for row in self.keys:
+            x = start_x
+            for key in row:
+                rect = pygame.Rect(x, y, key_w, key_h)
+                pygame.draw.rect(screen, (250, 250, 250), rect, border_radius=8)
+                pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=8)
+                t = self.small_font.render(key, True, (30, 30, 30))
+                screen.blit(t, t.get_rect(center=rect.center))
+                self.key_buttons.append((key, rect))
+                x += key_w + gap
+            y += key_h + gap
+            start_x += 30
+
+        # 스페셜 키들
+        specials_y = y
+        x = 120
+        for special in self.special_keys:
+            w = 220 if special == "Space" else 120
+            rect = pygame.Rect(x, specials_y, w, key_h)
+            pygame.draw.rect(screen, (220, 220, 220), rect, border_radius=10)
+            text = self.small_font.render(special, True, (30, 30, 30))
+            screen.blit(text, text.get_rect(center=rect.center))
+            self.key_buttons.append((special, rect))
+            x += w + 20
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            pos = event.pos
+
+            # 키보드 입력 처리
+            for key, rect in self.key_buttons:
+                if rect.collidepoint(pos):
+                    self._handle_key_input(key)
+                    return
+
+    def _handle_key_input(self, key):
+        if key == "Back":
+            self.text_input = self.text_input[:-1]
+        elif key == "Space":
+            self.text_input += " "
+        elif key == "Enter":
+            self.keyboard_visible = False
+        else:
+            self.text_input += key
+
+
+# ------------------------------
+# 즐겨찾기 화면
+# ------------------------------
+class FavoritesScreen(ScreenBase):
+    def __init__(self, ui):
+        super().__init__("Favorites", ui)
+        self.font = ui.font
+        self.small_font = ui.small_font
+        self.addresses = [f"주소{i}" for i in range(1, 6)]
+
+    def draw(self, screen, mouse_pos):
+        left_w = self.ui.side.width
+        area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40, self.ui.height - self.ui.bottom.h - 90)
+        pygame.draw.rect(screen, (245, 245, 245), area, border_radius=14)
+
+        title = self.font.render("즐겨찾기", True, (30, 30, 30))
+        screen.blit(title, (area.x + 20, area.y + 10))
+
+        y = area.y + 80
+        for addr in self.addresses:
+            rect = pygame.Rect(area.x + 40, y, 400, 50)
+            pygame.draw.rect(screen, (255, 255, 255), rect, border_radius=8)
+            pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=8)
+            t = self.small_font.render(addr, True, (40, 40, 40))
+            screen.blit(t, t.get_rect(center=rect.center))
+            y += 70
+
+        back_btn = pygame.Rect(area.right - 150, area.y + 20, 120, 40)
+        pygame.draw.rect(screen, (230, 230, 230), back_btn, border_radius=10)
+        t = self.small_font.render("뒤로가기", True, (0, 0, 0))
+        screen.blit(t, t.get_rect(center=back_btn.center))
+        self.back_btn = back_btn
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            return
+
+
+# ------------------------------
+# 최근 목적지 화면
+# ------------------------------
+class RecentScreen(ScreenBase):
+    def __init__(self, ui):
+        super().__init__("Recent Destinations", ui)
+        self.font = ui.font
+        self.small_font = ui.small_font
+        self.addresses = [f"최근 목적지{i}" for i in range(1, 6)]
+
+    def draw(self, screen, mouse_pos):
+        left_w = self.ui.side.width
+        area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40, self.ui.height - self.ui.bottom.h - 90)
+        pygame.draw.rect(screen, (245, 245, 245), area, border_radius=14)
+
+        title = self.font.render("최근 목적지", True, (30, 30, 30))
+        screen.blit(title, (area.x + 20, area.y + 10))
+
+        y = area.y + 80
+        for addr in self.addresses:
+            rect = pygame.Rect(area.x + 40, y, 400, 50)
+            pygame.draw.rect(screen, (255, 255, 255), rect, border_radius=8)
+            pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=8)
+            t = self.small_font.render(addr, True, (40, 40, 40))
+            screen.blit(t, t.get_rect(center=rect.center))
+            y += 70
+
+        back_btn = pygame.Rect(area.right - 150, area.y + 20, 120, 40)
+        pygame.draw.rect(screen, (230, 230, 230), back_btn, border_radius=10)
+        t = self.small_font.render("뒤로가기", True, (0, 0, 0))
+        screen.blit(t, t.get_rect(center=back_btn.center))
+        self.back_btn = back_btn
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            return
+
 
 # -------------------------------
 # helper
