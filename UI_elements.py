@@ -37,7 +37,7 @@ class Logger:
 # 1) 기본 UI 위젯
 # -------------------------------
 class Button:
-    def __init__(self, text, rect, action, font, colors, icon=None):
+    def __init__(self, text, rect, action, font, colors, log_name=None, icon=None):
         self.text = text
         self.rect = pygame.Rect(rect)
         self.action = action
@@ -45,6 +45,7 @@ class Button:
         self.colors = colors
         self.icon = icon
         self.is_pressed = False  # 클릭 상태 추가
+        self.log_name = log_name  # ← 추가
 
     def draw(self, surface, mouse_pos):
         hovered = self.rect.collidepoint(mouse_pos)
@@ -79,6 +80,17 @@ class Button:
         # 연결된 액션이 있으면 실행
         if callable(self.action):
             self.action()
+
+
+    def trigger(self, ui, pos=None):
+
+        # 기존 text 대신 log_name이 있으면 그걸 사용
+        log_target = self.log_name if self.log_name else self.text
+        ui.logger.log(ui.depth_path, log_target, pos or pygame.mouse.get_pos(), len(ui.depth_path))
+
+        if callable(self.action):
+            self.action()
+            
 
 # -------------------------------
 # 2) 상/좌/하 바

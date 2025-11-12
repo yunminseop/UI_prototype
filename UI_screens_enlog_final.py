@@ -6,7 +6,7 @@ class ScreenBase:
         self.name, self.ui = name, ui
         self.buttons = []
 
-    def draw(self, screen, mouse_pos):  # override
+    def draw(self, screen, mousepos):  # override
         pass
 
     def on_click(self, pos):  # 기본 버튼 클릭 핸들
@@ -14,7 +14,14 @@ class ScreenBase:
             if btn.check_click(pos):
                 if callable(btn.action):
                     btn.action()
-                self.ui.logger.log(self.ui.depth_path, btn.text, pos, len(self.ui.depth_path))
+                self.ui.logger.log(
+                    self.ui.depth_path,
+                    btn.log_name if hasattr(btn, "log_name") and btn.log_name else btn.text,
+                    pos,
+                    len(self.ui.depth_path)
+                )
+
+
                 return True
         return False
 
@@ -26,7 +33,7 @@ class HomeScreen(ScreenBase):
     def __init__(self, ui):
         super().__init__("Home", ui)
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         # 가운데/오른쪽 카드
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40, self.ui.height - self.ui.bottom.h - 90)
@@ -166,7 +173,7 @@ class QuickSettingsScreen(ScreenBase):
                     new_offset = self.scroll_start_offset - scroll_ratio * max_scroll
                     self.scroll_offset = max(-max_scroll, min(0, new_offset))
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         panel = pygame.Rect(left_w + 20, 70,
                             self.ui.width - left_w - 40,
@@ -260,7 +267,7 @@ class QuickSettingsScreen(ScreenBase):
                     "차량 정보": "Vehicle_Info",
                 }
                 eng_name = menu_name_map.get(name, name.replace(" ", "_"))
-                self.ui.logger.log(self.ui.depth_path, eng_name, pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path, eng_name,pos,len(self.ui.depth_path))
                 return True
 
         # 기능 타일 클릭
@@ -287,8 +294,15 @@ class QuickSettingsScreen(ScreenBase):
                 }
                 eng_label = label_map.get(label, label)
                 eng_state = state_map.get(state, state)
-                self.ui.logger.log(self.ui.depth_path, f"{eng_label}_{eng_state}", pos, len(self.ui.depth_path))
+
+                self.ui.logger.log(
+                    self.ui.depth_path,
+                    f"{eng_label}_{eng_state}",
+                    pos,
+                    len(self.ui.depth_path)
+                )
                 return True
+
 
         # 라이트 버튼 클릭
         for name, r in self.light_rects:
@@ -296,14 +310,14 @@ class QuickSettingsScreen(ScreenBase):
                 self.selected_light = name
                 light_map = {"미등": "taillight", "전조등": "headlight"}
                 eng_light = light_map.get(name, name.lower())
-                self.ui.logger.log(self.ui.depth_path, f"light_{eng_light}", pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"light_{eng_light}", pos, len(self.ui.depth_path))
                 return True
 
         # 와이퍼 버튼 클릭
         for name, r in self.wiper_rects:
             if r.collidepoint(pos):
                 self.selected_wiper = name
-                self.ui.logger.log(self.ui.depth_path, f"wiper_{name.lower()}", pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"wiper_{name.lower()}", pos, len(self.ui.depth_path))
                 return True
 
         return False
@@ -334,7 +348,7 @@ class LightSettingsScreen(ScreenBase):
         self.mode_buttons = []
         self.toggles = {}
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(
             left_w + 20, 70,
@@ -399,8 +413,8 @@ class LightSettingsScreen(ScreenBase):
             self.knob_rects[name] = knob_rect
             pygame.draw.circle(screen, (80, 80, 80), knob_rect.center, knob_r)
 
-            percent_text = self.ui.tiny_font.render(f"{int(val * 100)}%", True, (40, 40, 40))
-            screen.blit(percent_text, (bar_rect.right + 25, bar_rect.y - 6))
+            percenttext = self.ui.tiny_font.render(f"{int(val * 100)}%", True, (40, 40, 40))
+            screen.blit(percenttext, (bar_rect.right + 25, bar_rect.y - 6))
             y += 60
 
         # === 방향지시등 ===
@@ -417,9 +431,9 @@ class LightSettingsScreen(ScreenBase):
         self._draw_toggle(screen, area.x + 20, y, "자동 비상등",
                           "hazard", self.auto_hazard)
 
-    def _draw_toggle(self, screen, x, y, label_text, key, state):
+    def _draw_toggle(self, screen, x, y, labeltext, key, state):
         """토글 공용 드로잉"""
-        label = self.ui.small_font.render(label_text, True, (30, 30, 30))
+        label = self.ui.small_font.render(labeltext, True, (30, 30, 30))
         screen.blit(label, (x, y))
         toggle_rect = pygame.Rect(x + 240, y - 5, 50, 26)
         self.toggles[key] = toggle_rect
@@ -438,8 +452,7 @@ class LightSettingsScreen(ScreenBase):
             if rect.collidepoint(pos):
                 self.selected_mode = mode
                 menu_map = {"미등": "taillight", "전조등": "headlight"}
-                self.ui.logger.log(self.ui.depth_path, f"light_mode_{menu_map.get(mode, mode.lower())}",
-                                   pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"light_mode_{menu_map.get(mode, mode.lower())}", pos, len(self.ui.depth_path))
                 return True
 
         # 토글 클릭
@@ -448,18 +461,15 @@ class LightSettingsScreen(ScreenBase):
                 if key == "steering":
                     self.steering_button_light = not self.steering_button_light
                     st = "On" if self.steering_button_light else "Off"
-                    self.ui.logger.log(self.ui.depth_path, f"driver_btn_signal_{st}",
-                                       pos, len(self.ui.depth_path))
+                    self.ui.logger.log(self.ui.depth_path,f"driverbtn_signal_{st}", pos,len(self.ui.depth_path))
                 elif key == "turn":
                     self.auto_turn_signal = not self.auto_turn_signal
                     st = "On" if self.auto_turn_signal else "Off"
-                    self.ui.logger.log(self.ui.depth_path, f"auto_turn_{st}",
-                                       pos, len(self.ui.depth_path))
+                    self.ui.logger.log(self.ui.depth_path,f"auto_turn_{st}", pos,len(self.ui.depth_path))
                 elif key == "hazard":
                     self.auto_hazard = not self.auto_hazard
                     st = "On" if self.auto_hazard else "Off"
-                    self.ui.logger.log(self.ui.depth_path, f"auto_hazard_{st}",
-                                       pos, len(self.ui.depth_path))
+                    self.ui.logger.log(self.ui.depth_path,f"auto_hazard_{st}", pos,len(self.ui.depth_path))
                 return True
 
         # 슬라이더 클릭 시 드래그 시작
@@ -501,9 +511,7 @@ class LightSettingsScreen(ScreenBase):
                 self.dragging_slider = None
                 menu_map = {"실내등 밝기": "in_light_brightness", "무드조명": "amb_light_brightness"}
                 
-                self.ui.logger.log(
-                    self.ui.depth_path,
-                    f"{menu_map.get(name, name.lower())}_{self.sliders[name]:.2f}",
+                self.ui.logger.log(self.ui.depth_path,f"{menu_map.get(name,name.lower())}_{self.sliders[name]:.2f}",
                     event.pos, len(self.ui.depth_path)
                 )
 
@@ -582,7 +590,7 @@ class DrivingAssistScreen(ScreenBase):
     # ======================================================
     # 그리기
     # ======================================================
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -633,7 +641,7 @@ class LockSettingsScreen(ScreenBase):
         super().__init__("Lock Setting", ui)
         self.ui = ui
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         # 섹션1: 자동 잠금 해제
@@ -653,8 +661,8 @@ class LockSettingsScreen(ScreenBase):
         }
 
         # 라디오 버튼 객체
-        self.unlock_radio_btns = []
-        self.lock_radio_btns   = []
+        self.unlock_radiobtns = []
+        self.lock_radiobtns   = []
 
         # 클릭 감지용 토글 히트박스
         self.toggle_hitboxes = {}
@@ -665,28 +673,28 @@ class LockSettingsScreen(ScreenBase):
         # 버튼의 기본 크기만 정해두고, 실제 위치는 draw에서 일괄 배치
         bw, bh = 140, 50
         for name in self.unlock_modes:
-            self.unlock_radio_btns.append(
+            self.unlock_radiobtns.append(
                 Button(name, (0, 0, bw, bh),
                        action=lambda n=name: self._select_unlock(n),
-                       font=self.small_font, colors=self.colors)
+                       font=self.smallfont, colors=self.colors)
             )
         for name in self.lock_modes:
-            self.lock_radio_btns.append(
+            self.lock_radiobtns.append(
                 Button(name, (0, 0, bw, bh),
                        action=lambda n=name: self._select_lock(n),
-                       font=self.small_font, colors=self.colors)
+                       font=self.smallfont, colors=self.colors)
             )
 
     # 상태 변경 + 로깅
     def _select_unlock(self, name):
         self.selected_unlock = name
         menu_map = {"운전자 접근": "driver_approach", "손잡이 터치": "handle_touch"}
-        self.ui.logger.log(self.ui.depth_path, f"UnlockMode_{menu_map.get(name, name.lower())}", pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"UnlockMode_{menu_map.get(name,name.lower())}", pygame.mouse.get_pos(), len(self.ui.depth_path))
 
     def _select_lock(self, name):
         self.selected_lock = name
         menu_map = {"운전자 이탈": "driver_depart", "손잡이 터치": "handle_touch"}
-        self.ui.logger.log(self.ui.depth_path, f"LockMode_{menu_map.get(name, name.lower())}", pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"LockMode_{menu_map.get(name,name.lower())}", pygame.mouse.get_pos(), len(self.ui.depth_path))
 
     def _toggle_item(self, group, name):
         # 상태 반전
@@ -710,17 +718,14 @@ class LockSettingsScreen(ScreenBase):
         state_str = "on" if active else "off"
 
         # === (2) 로그 기록 ===
-        self.ui.logger.log(
-            self.ui.depth_path,
-            f"{eng_name}_{state_str}",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,f"{eng_name}_{state_str}",pygame.mouse.get_pos(),
             len(self.ui.depth_path)
         )
 
     # 토글 스위치 그리기 + 히트박스 기록
     def _draw_toggle(self, screen, label_x, control_x, y, text, active, key):
         # 라벨
-        lab = self.small_font.render(text, True, (30, 30, 30))
+        lab = self.smallfont.render(text, True, (30, 30, 30))
         screen.blit(lab, (label_x, y))
 
         # 스위치
@@ -733,7 +738,7 @@ class LockSettingsScreen(ScreenBase):
         # pygame.draw.circle(screen, knob_color, (knob_x, rect.centery), knob_r)
         
         # 상태 텍스트
-        st = self.small_font.render("ON" if active else "OFF", True, (70, 70, 70))
+        st = self.smallfont.render("ON" if active else "OFF", True, (70, 70, 70))
         screen.blit(st, (rect.right + 10, rect.y + 4))
         if active:
             pygame.draw.rect(screen, (150, 255, 150), rect, border_radius=15)
@@ -745,7 +750,7 @@ class LockSettingsScreen(ScreenBase):
         # 클릭용 저장
         self.toggle_hitboxes[key] = rect
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -763,16 +768,16 @@ class LockSettingsScreen(ScreenBase):
         y = area.y + 70
 
         # 섹션 1: 자동 잠금 해제
-        screen.blit(self.small_font.render("자동 잠금 해제", True, (30, 30, 30)), (label_x, y))
+        screen.blit(self.smallfont.render("자동 잠금 해제", True, (30, 30, 30)), (label_x, y))
         y += 34
 
         # 라디오 행 배치
         bw, bh, rgap = 140, 50, 10
-        for i, btn in enumerate(self.unlock_radio_btns):
+        for i, btn in enumerate(self.unlock_radiobtns):
             btn.rect.update(control_x + i * (bw + rgap), y, bw, bh)
             color = (150, 255, 150) if btn.text == self.selected_unlock else (230, 230, 230)
             pygame.draw.rect(screen, color, btn.rect, border_radius=10)
-            t = self.small_font.render(btn.text, True, (255, 255, 255) if btn.text == self.selected_unlock else (40, 40, 40))
+            t = self.smallfont.render(btn.text, True, (255, 255, 255) if btn.text == self.selected_unlock else (40, 40, 40))
             screen.blit(t, t.get_rect(center=btn.rect.center))
 
         y += bh + 18
@@ -785,14 +790,14 @@ class LockSettingsScreen(ScreenBase):
 
         # 섹션 2: 자동 잠금
         y += 16
-        screen.blit(self.small_font.render("자동 잠금", True, (30, 30, 30)), (label_x, y))
+        screen.blit(self.smallfont.render("자동 잠금", True, (30, 30, 30)), (label_x, y))
         y += 34
 
-        for i, btn in enumerate(self.lock_radio_btns):
+        for i, btn in enumerate(self.lock_radiobtns):
             btn.rect.update(control_x + i * (bw + rgap), y, bw, bh)
             color = (150, 255, 150) if btn.text == self.selected_lock else (230, 230, 230)
             pygame.draw.rect(screen, color, btn.rect, border_radius=10)
-            t = self.small_font.render(btn.text, True, (255, 255, 255) if btn.text == self.selected_lock else (40, 40, 40))
+            t = self.smallfont.render(btn.text, True, (255, 255, 255) if btn.text == self.selected_lock else (40, 40, 40))
             screen.blit(t, t.get_rect(center=btn.rect.center))
 
         y += bh + 18
@@ -802,11 +807,11 @@ class LockSettingsScreen(ScreenBase):
 
     def on_click(self, pos):
         # 라디오
-        for btn in self.unlock_radio_btns:
+        for btn in self.unlock_radiobtns:
             if btn.check_click(pos):
                 btn.action()
                 return True
-        for btn in self.lock_radio_btns:
+        for btn in self.lock_radiobtns:
             if btn.check_click(pos):
                 btn.action()
                 return True
@@ -881,7 +886,7 @@ class SeatPositionScreen(ScreenBase):
     # ======================================================
     # 화면 그리기
     # ======================================================
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -989,7 +994,7 @@ class ClimateScreen(ScreenBase):
     # ======================================================
     # 화면 그리기
     # ======================================================
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -1001,17 +1006,17 @@ class ClimateScreen(ScreenBase):
         screen.blit(title, (area.x + 16, area.y + 12))
 
         # 그룹 제목 표시용
-        group_positions = {}  # {group_name: y 좌표}
+        grouppositions = {}  # {group_name: y 좌표}
 
         # 버튼 그룹별 위치 계산
         for group_name, b in self.toggle_buttons:
-            if group_name not in group_positions:
-                group_positions[group_name] = b.rect.y - 40
+            if group_name not in grouppositions:
+                grouppositions[group_name] = b.rect.y - 40
 
         # 그룹 제목 렌더링
-        for group_name, y_pos in group_positions.items():
+        for group_name, ypos in grouppositions.items():
             label = self.ui.small_font.render(group_name, True, (30, 30, 30))
-            screen.blit(label, (area.x + 20, y_pos))
+            screen.blit(label, (area.x + 20, ypos))
 
         # 버튼 표시
         for group_name, b in self.toggle_buttons:
@@ -1046,34 +1051,25 @@ class ChargingScreen(ScreenBase):
     # -------------------------------------------------
     def dec_amp(self):
         self.amp = max(6, self.amp - 2)
-        self.ui.logger.log(
-            self.ui.depth_path,
-            "-2A",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,"-2A",pygame.mouse.get_pos(),
             len(self.ui.depth_path),
         )
 
     def inc_amp(self):
         self.amp = min(80, self.amp + 2)
-        self.ui.logger.log(
-            self.ui.depth_path,
-            "+2A",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,"+2A",pygame.mouse.get_pos(),
             len(self.ui.depth_path),
         )
 
     def set_mode(self, mode):
         self.display_mode = mode
-        self.ui.logger.log(
-            self.ui.depth_path,
-            f"{mode}",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,f"{mode}",pygame.mouse.get_pos(),
             len(self.ui.depth_path),
         )
     # -------------------------------------------------
     # 화면 표시
     # -------------------------------------------------
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -1160,7 +1156,7 @@ class NavigationSettingsScreen(ScreenBase):
         super().__init__("Navigation Setting", ui)
 
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         # 1️⃣ 토글 상태 (유지됨)
@@ -1199,7 +1195,7 @@ class NavigationSettingsScreen(ScreenBase):
         self.buttons.append(
             Button("EV 경로 플래너", (x, y, bw, bh),
                    lambda: self.toggle("EV 경로 플래너"),
-                   self.small_font, self.colors)
+                   self.smallfont, self.colors)
         )
 
         # 선호 충전소 (토글)
@@ -1209,7 +1205,7 @@ class NavigationSettingsScreen(ScreenBase):
             self.buttons.append(
                 Button(label, (x, y, bw, bh),
                        lambda t=label: self.toggle(t),
-                       self.small_font, self.colors)
+                       self.smallfont, self.colors)
             )
             x += bw + gap_x
             count += 1
@@ -1221,7 +1217,7 @@ class NavigationSettingsScreen(ScreenBase):
         self.buttons.append(
             Button("더보기", (x, y, bw, bh),
                    lambda: print("Clicked: more"),
-                   self.small_font, self.colors)
+                   self.smallfont, self.colors)
         )
 
     # --------------------------------------------------
@@ -1231,12 +1227,12 @@ class NavigationSettingsScreen(ScreenBase):
             self.toggle_states[name] = not self.toggle_states[name]
             state = "ON" if self.toggle_states[name] else "OFF"
             # 로그 남기기
-            mouse_pos = pygame.mouse.get_pos()
-            # self.ui.logger.log(self.ui.depth_path, f"{name} ({state})", mouse_pos, len(self.ui.depth_path))
+            mousepos = pygame.mouse.get_pos()
+            # self.ui.logger.log(self.ui.depth_path,f"{name}_({state})", mousepos, len(self.ui.depth_path))
             # print(f"[NAV] {name}: {state}")
 
     # --------------------------------------------------
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         """화면 표시"""
         left_w = self.ui.side.width
         area = pygame.Rect(
@@ -1256,12 +1252,12 @@ class NavigationSettingsScreen(ScreenBase):
                 active = self.toggle_states[label]
                 color = (150, 255, 150) if active else (200, 200, 200)
                 pygame.draw.rect(screen, color, btn.rect, border_radius=8)
-                txt = self.small_font.render(label, True, (20, 20, 20))
+                txt = self.smallfont.render(label, True, (20, 20, 20))
                 screen.blit(txt, txt.get_rect(center=btn.rect.center))
             else:
-                btn.draw(screen, mouse_pos)
+                btn.draw(screen, mousepos)
 
-        version = self.small_font.render("내비게이션 \r 2.1.2-rc", True, (80, 80, 80))
+        version = self.smallfont.render("내비게이션 \r 2.1.2-rc", True, (80, 80, 80))
         screen.blit(version, (area.x + 20, area.bottom - 35))
 
     # --------------------------------------------------
@@ -1270,7 +1266,7 @@ class NavigationSettingsScreen(ScreenBase):
         for btn in self.buttons:
             if btn.check_click(pos):
                 btn.action()
-                self.ui.logger.log(self.ui.depth_path, btn.text, pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,btn.text,pos,len(self.ui.depth_path))
                 return True
         return False
 
@@ -1280,7 +1276,7 @@ class GleoAIScreen(ScreenBase):
     def __init__(self, ui):
         super().__init__("Gleo AI", ui)
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         self.selected_voice = "음성1"
@@ -1296,18 +1292,18 @@ class GleoAIScreen(ScreenBase):
         bw, bh = 110, 45
         gap_x = 15
 
-        # 1️⃣ 음성 버튼
+        # 음성 버튼
         self.voice_buttons = []
         x = base_x
         for v in ["음성1", "음성2", "음성3", "음성4", "음성5", "음성6"]:
             rect = pygame.Rect(x, base_y + 30, bw, bh)  # ← Y를 +30 내려줌
             self.voice_buttons.append(
                 Button(v, rect, lambda val=v: self.select_voice(val),
-                       self.small_font, self.colors)
+                       self.smallfont, self.colors)
             )
             x += bw + gap_x
 
-        # 2️⃣ 대화 스타일 버튼
+        # 대화 스타일 버튼
         self.style_buttons = []
         sx = base_x
         style_y = base_y + 130  # ← 확실히 아래로 떨어뜨림
@@ -1315,30 +1311,30 @@ class GleoAIScreen(ScreenBase):
             rect = pygame.Rect(sx, style_y + 30, 120, bh)
             self.style_buttons.append(
                 Button(s, rect, lambda val=s: self.select_style(val),
-                       self.small_font, self.colors)
+                       self.smallfont, self.colors)
             )
             sx += 140
 
-        # 3️⃣ 호출 토글
+        # 호출 토글
         self.call_toggle_rect = pygame.Rect(base_x + 110, style_y + 130, 60, 30)
 
     def select_voice(self, voice):
         self.selected_voice = voice
-        self.ui.logger.log(self.ui.depth_path, f"Voice: {voice}",
-                           pygame.mouse.get_pos(), len(self.ui.depth_path))
+        menu_map = {"음성1": "Voice1", "음성2": "Voice2", "음성3": "Voice3",
+                    "음성4": "Voice4", "음성5": "Voice5", "음성6": "Voice6"}
+        self.ui.logger.log(self.ui.depth_path,f"Voice_{menu_map.get(voice, voice.lower())}",pygame.mouse.get_pos(), len(self.ui.depth_path))
 
     def select_style(self, style):
         self.selected_style = style
-        self.ui.logger.log(self.ui.depth_path, f"Style: {style}",
-                           pygame.mouse.get_pos(), len(self.ui.depth_path))
+        menu_map = {"정중함": "Polite", "친근함": "Friendly"}
+        self.ui.logger.log(self.ui.depth_path,f"Style_{menu_map.get(style, style.lower())}",pygame.mouse.get_pos(), len(self.ui.depth_path))
 
     def toggle_call(self):
         self.call_toggle = not self.call_toggle
         state = "ON" if self.call_toggle else "OFF"
-        self.ui.logger.log(self.ui.depth_path, f"CallTrigger: {state}",
-                           pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"CallTrigger_{state}",pygame.mouse.get_pos(), len(self.ui.depth_path))
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -1350,27 +1346,27 @@ class GleoAIScreen(ScreenBase):
 
         # === 음성 유형 ===
         label_voice_y = self.voice_buttons[0].rect.y - 28  # ← 버튼보다 위쪽
-        screen.blit(self.small_font.render("음성 유형", True, (30, 30, 30)),
+        screen.blit(self.smallfont.render("음성 유형", True, (30, 30, 30)),
                     (area.x + 20, label_voice_y))
         for btn in self.voice_buttons:
             color = (150, 255, 150) if btn.text == self.selected_voice else (220, 220, 220)
             pygame.draw.rect(screen, color, btn.rect, border_radius=8)
-            screen.blit(self.small_font.render(btn.text, True, (25, 25, 25)),
-                        self.small_font.render(btn.text, True, (25, 25, 25)).get_rect(center=btn.rect.center))
+            screen.blit(self.smallfont.render(btn.text, True, (25, 25, 25)),
+                        self.smallfont.render(btn.text, True, (25, 25, 25)).get_rect(center=btn.rect.center))
 
         # === 대화 스타일 ===
         label_style_y = self.style_buttons[0].rect.y - 28
-        screen.blit(self.small_font.render("대화 스타일", True, (30, 30, 30)),
+        screen.blit(self.smallfont.render("대화 스타일", True, (30, 30, 30)),
                     (area.x + 20, label_style_y))
         for btn in self.style_buttons:
             color = (150, 255, 150) if btn.text == self.selected_style else (220, 220, 220)
             pygame.draw.rect(screen, color, btn.rect, border_radius=8)
-            screen.blit(self.small_font.render(btn.text, True, (25, 25, 25)),
-                        self.small_font.render(btn.text, True, (25, 25, 25)).get_rect(center=btn.rect.center))
+            screen.blit(self.smallfont.render(btn.text, True, (25, 25, 25)),
+                        self.smallfont.render(btn.text, True, (25, 25, 25)).get_rect(center=btn.rect.center))
 
         # === 호출 방법 ===
         label_call_y = self.call_toggle_rect.y - 30
-        screen.blit(self.small_font.render("호출 방법", True, (30, 30, 30)),
+        screen.blit(self.smallfont.render("호출 방법", True, (30, 30, 30)),
                     (area.x + 20, label_call_y))
 
         # 토글
@@ -1387,7 +1383,7 @@ class GleoAIScreen(ScreenBase):
             pygame.draw.circle(screen, knob_color, (knob_x, toggle_rect.centery), knob_radius)
 
         # 오른쪽 텍스트
-        screen.blit(self.small_font.render("'글레오'라고 부르기", True, (40, 40, 40)),
+        screen.blit(self.smallfont.render("'글레오'라고 부르기", True, (40, 40, 40)),
                     (toggle_rect.right + 10, toggle_rect.y + 4))
 
     def on_click(self, pos):
@@ -1406,7 +1402,7 @@ class DisplaySettingsScreen(ScreenBase):
         super().__init__("Display Setting", ui)
 
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         self.themes = ["라이트", "다크"]
@@ -1436,11 +1432,10 @@ class DisplaySettingsScreen(ScreenBase):
 
     def select_theme(self, name):
         self.selected_theme = name
-        self.ui.logger.log(self.ui.depth_path, f"Theme: {name}",
-                           pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"Theme_{name}",pygame.mouse.get_pos(), len(self.ui.depth_path))
         print(f"Clicked: {name}")
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -1451,17 +1446,17 @@ class DisplaySettingsScreen(ScreenBase):
         screen.blit(title, (area.x + 20, area.y + 10))
 
         y_label = area.y + 70
-        screen.blit(self.small_font.render("테마", True, (30, 30, 30)),
+        screen.blit(self.smallfont.render("테마", True, (30, 30, 30)),
                     (area.x + 20, y_label))
 
         for t, rect in self.theme_buttons:
             color = (150, 255, 150) if t == self.selected_theme else (225, 225, 225)
             pygame.draw.rect(screen, color, rect, border_radius=12)
-            txt = self.small_font.render(t, True, (25, 25, 25))
+            txt = self.smallfont.render(t, True, (25, 25, 25))
             screen.blit(txt, txt.get_rect(center=rect.center))
 
         y_slider_label = self.theme_buttons[0][1].bottom + 100
-        screen.blit(self.small_font.render("밝기 조절", True, (30, 30, 30)),
+        screen.blit(self.smallfont.render("밝기 조절", True, (30, 30, 30)),
                     (area.x + 20, y_slider_label))
 
         slider_x = area.x + 140
@@ -1481,8 +1476,8 @@ class DisplaySettingsScreen(ScreenBase):
         self.knob_rect = pygame.Rect(knob_x - knob_r, knob_y - knob_r, knob_r * 2, knob_r * 2)
         pygame.draw.circle(screen, (80, 80, 80), self.knob_rect.center, knob_r)
 
-        percent_text = self.small_font.render(f"{int(self.brightness * 100)}%", True, (40, 40, 40))
-        screen.blit(percent_text, (slider_x + slider_w + 20, slider_y - 6))
+        percenttext = self.smallfont.render(f"{int(self.brightness * 100)}%", True, (40, 40, 40))
+        screen.blit(percenttext, (slider_x + slider_w + 20, slider_y - 6))
 
     def on_click(self, pos):
         for t, rect in self.theme_buttons:
@@ -1498,9 +1493,7 @@ class DisplaySettingsScreen(ScreenBase):
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.dragging_slider:
                 self.dragging_slider = False
-                self.ui.logger.log(self.ui.depth_path,
-                                   f"Brightness: {self.brightness:.2f}",
-                                   event.pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"Brightness_{self.brightness:.2f}",event.pos,len(self.ui.depth_path))
         elif event.type == pygame.MOUSEMOTION and self.dragging_slider:
             if self.slider_rect:
                 rel_x = max(self.slider_rect.left, min(event.pos[0], self.slider_rect.right))
@@ -1516,8 +1509,7 @@ class DisplaySettingsScreen(ScreenBase):
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.dragging_slider:
                 self.dragging_slider = False
-                self.ui.logger.log(self.ui.depth_path, f"Brightness: {self.brightness:.2f}",
-                                   event.pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"Brightness_{self.brightness:.2f}",event.pos,len(self.ui.depth_path))
         elif event.type == pygame.MOUSEMOTION and self.dragging_slider:
             if self.slider_rect:
                 # 슬라이더 위치에 맞게 밝기 갱신
@@ -1530,7 +1522,7 @@ class SecurityScreen(ScreenBase):
         super().__init__("Sec Setting", ui)
 
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         # 상태값
@@ -1557,7 +1549,7 @@ class SecurityScreen(ScreenBase):
         for m in self.record_modes:
             rect = pygame.Rect(x, base_y, bw, bh)
             self.mode_buttons.append(
-                Button(m, rect, lambda val=m: self.select_mode(val), self.small_font, self.colors)
+                Button(m, rect, lambda val=m: self.select_mode(val), self.smallfont, self.colors)
             )
             x += bw + gap_x
 
@@ -1570,28 +1562,28 @@ class SecurityScreen(ScreenBase):
         for label in ["클립 삭제", "USB 포맷"]:
             rect = pygame.Rect(x2, y_bottom, 140, 50)
             self.action_buttons.append(
-                Button(label, rect, lambda name=label: self.log_action(name), self.small_font, self.colors)
+                Button(label, rect, lambda name=label: self.log_action(name), self.smallfont, self.colors)
             )
             x2 += 160
 
     # -------------------------------------------------
     def select_mode(self, name):
         self.selected_mode = name
-        self.ui.logger.log(self.ui.depth_path, f"RecordMode: {name}", pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"RecordMode_{name}",pygame.mouse.get_pos(), len(self.ui.depth_path))
         print(f"[Clicked: {name}")
 
     def toggle_onhook(self):
         self.onhook_enabled = not self.onhook_enabled
         state = "ON" if self.onhook_enabled else "OFF"
-        self.ui.logger.log(self.ui.depth_path, f"OnHook: {state}", pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"OnHook_{state}",pygame.mouse.get_pos(), len(self.ui.depth_path))
         print(f"Clicked: {state}")
 
     def log_action(self, name):
-        self.ui.logger.log(self.ui.depth_path, f"Action: {name}", pygame.mouse.get_pos(), len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"Action_{name}",pygame.mouse.get_pos(), len(self.ui.depth_path))
         print(f"Clicked: {name}")
 
     # -------------------------------------------------
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                         self.ui.width - left_w - 40,
@@ -1604,17 +1596,17 @@ class SecurityScreen(ScreenBase):
 
         # === 1️⃣ 녹화 모드 ===
         label_y = area.y + 70
-        screen.blit(self.small_font.render("녹화 모드", True, (30, 30, 30)), (area.x + 20, label_y))
+        screen.blit(self.smallfont.render("녹화 모드", True, (30, 30, 30)), (area.x + 20, label_y))
         for btn in self.mode_buttons:
             color = (150, 255, 150) if btn.text == self.selected_mode else (225, 225, 225)
             pygame.draw.rect(screen, color, btn.rect, border_radius=10)
-            txt = self.small_font.render(btn.text, True, (25, 25, 25))
+            txt = self.smallfont.render(btn.text, True, (25, 25, 25))
             screen.blit(txt, txt.get_rect(center=btn.rect.center))
 
         # === 2️⃣ 온후크 토글 ===
         toggle_label_x = self.onhook_rect.right + 10
         toggle_label_y = self.onhook_rect.y + 5
-        screen.blit(self.small_font.render("온후크", True, (40, 40, 40)), (toggle_label_x, toggle_label_y))
+        screen.blit(self.smallfont.render("온후크", True, (40, 40, 40)), (toggle_label_x, toggle_label_y))
         toggle_rect = self.onhook_rect
         knob_radius = toggle_rect.height // 2 - 2
         knob_x = toggle_rect.left + knob_radius + 2 if not self.onhook_enabled else toggle_rect.right - knob_radius - 2
@@ -1630,7 +1622,7 @@ class SecurityScreen(ScreenBase):
 
         # === 3️⃣ 하단 기능 버튼 ===
         for btn in self.action_buttons:
-            btn.draw(screen, mouse_pos)
+            btn.draw(screen, mousepos)
 
     # -------------------------------------------------
     def on_click(self, pos):
@@ -1660,7 +1652,7 @@ class SoundScreen(ScreenBase):
         super().__init__("Sound Setting", ui)
         self.ui = ui
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         # 주행 사운드 강도 (라디오 버튼)
@@ -1676,23 +1668,17 @@ class SoundScreen(ScreenBase):
     def _select_mode(self, mode):
         if mode != self.selected_mode:
             self.selected_mode = mode
-            self.ui.logger.log(
-                self.ui.depth_path,
-                f"DrivingSound: {mode}",
-                pygame.mouse.get_pos(),
+            self.ui.logger.log(self.ui.depth_path,f"DrivingSound_{mode}",pygame.mouse.get_pos(),
                 len(self.ui.depth_path),
             )
 
     def _set_tone_value(self, tone, value):
         self.tones[tone] = max(0.0, min(1.0, value))
-        self.ui.logger.log(
-            self.ui.depth_path,
-            f"Tone-{tone}: {self.tones[tone]:.2f}",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,f"Tone-{tone}_{self.tones[tone]:.2f}",pygame.mouse.get_pos(),
             len(self.ui.depth_path),
         )
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -1705,19 +1691,19 @@ class SoundScreen(ScreenBase):
 
         # --- 주행 사운드 강도 ---
         y_mode_title = area.y + 70
-        label = self.small_font.render("사운드 강도 설정", True, (30, 30, 30))
+        label = self.smallfont.render("사운드 강도 설정", True, (30, 30, 30))
         screen.blit(label, (area.x + 30, y_mode_title))
 
         bw, bh, gap = 120, 50, 15
         x = area.x + 30
-        y_btn = y_mode_title + 40
+        ybtn = y_mode_title + 40
         self.mode_buttons = []
 
         for m in self.modes:
-            rect = pygame.Rect(x, y_btn, bw, bh)
+            rect = pygame.Rect(x, ybtn, bw, bh)
             color = (150, 255, 150) if m == self.selected_mode else (230, 230, 230)
             pygame.draw.rect(screen, color, rect, border_radius=10)
-            txt = self.small_font.render(
+            txt = self.smallfont.render(
                 m, True, (255, 255, 255) if m == self.selected_mode else (40, 40, 40)
             )
             screen.blit(txt, txt.get_rect(center=rect.center))
@@ -1725,8 +1711,8 @@ class SoundScreen(ScreenBase):
             x += bw + gap
 
         # --- 톤 설정 ---
-        y_tone_title = y_btn + bh + 80
-        tone_title = self.small_font.render("톤 설정", True, (30, 30, 30))
+        y_tone_title = ybtn + bh + 80
+        tone_title = self.smallfont.render("톤 설정", True, (30, 30, 30))
         screen.blit(tone_title, (area.x + 30, y_tone_title))
 
         self.slider_rects.clear()
@@ -1737,7 +1723,7 @@ class SoundScreen(ScreenBase):
 
         for tone, val in self.tones.items():
             # 라벨
-            label = self.small_font.render(tone, True, (30, 30, 30))
+            label = self.smallfont.render(tone, True, (30, 30, 30))
             screen.blit(label, (area.x + 50, y - 6))
 
             # 트랙 + 채움
@@ -1753,7 +1739,7 @@ class SoundScreen(ScreenBase):
 
             # 값 표시 (%)
             percent = int(val * 100)
-            txt = self.small_font.render(f"{percent}%", True, (40, 40, 40))
+            txt = self.smallfont.render(f"{percent}%", True, (40, 40, 40))
             screen.blit(txt, (slider_rect.right + 20, y - 6))
 
             self.slider_rects[tone] = (slider_rect, knob_r)
@@ -1806,7 +1792,7 @@ class ProfileScreen(ScreenBase):
         super().__init__("Profile Setting", ui)
         self.ui = ui
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         # 입력 상태 관리
@@ -1836,10 +1822,7 @@ class ProfileScreen(ScreenBase):
         if self.text_input.strip():
             # 기존: self.current_profile = self.text_input.strip()
             self.ui.current_profile = self.text_input.strip()  # 전역 상태로 저장
-            self.ui.logger.log(
-                self.ui.depth_path,
-                f"ProfileAdded: {self.ui.current_profile}",
-                pygame.mouse.get_pos(),
+            self.ui.logger.log(self.ui.depth_path,f"ProfileAdded_{self.ui.current_profile}",pygame.mouse.get_pos(),
                 len(self.ui.depth_path),
             )
             self.text_input = ""
@@ -1849,17 +1832,14 @@ class ProfileScreen(ScreenBase):
     def _toggle_keyboard(self, visible=True):
         self.keyboard_visible = visible
         self.input_active = visible
-        self.ui.logger.log(
-            self.ui.depth_path,
-            f"Keyboard {'Shown' if visible else 'Hidden'}",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,f"Keyboard_{'Shown'if visible else 'Hidden'}",pygame.mouse.get_pos(),
             len(self.ui.depth_path),
         )
 
     # ------------------------
     # 메인 그리기
     # ------------------------
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(
             left_w + 20,
@@ -1875,23 +1855,23 @@ class ProfileScreen(ScreenBase):
 
         # --- 입력창 + 추가 버튼 ---
         input_rect = pygame.Rect(area.x + 30, area.y + 70, 220, 50)
-        add_btn_rect = pygame.Rect(input_rect.right + 20, area.y + 70, 120, 50)
+        addbtn_rect = pygame.Rect(input_rect.right + 20, area.y + 70, 120, 50)
 
         pygame.draw.rect(screen, (255, 255, 255), input_rect, border_radius=10)
         pygame.draw.rect(screen, (200, 200, 200), input_rect, 2, border_radius=10)
 
         # 텍스트 표시
-        txt = self.small_font.render(self.text_input or "이름 입력...", True, (50, 50, 50))
+        txt = self.smallfont.render(self.text_input or "이름 입력...", True, (50, 50, 50))
         screen.blit(txt, (input_rect.x + 10, input_rect.y + 15))
 
         # 버튼
-        pygame.draw.rect(screen, (230, 230, 230), add_btn_rect, border_radius=10)
-        t = self.small_font.render("프로필 추가", True, (0, 0, 0))
-        screen.blit(t, t.get_rect(center=add_btn_rect.center))
+        pygame.draw.rect(screen, (230, 230, 230), addbtn_rect, border_radius=10)
+        t = self.smallfont.render("프로필 추가", True, (0, 0, 0))
+        screen.blit(t, t.get_rect(center=addbtn_rect.center))
 
         # --- 제어 섹션 ---
         y = area.y + 180
-        label = self.small_font.render("제어", True, (30, 30, 30))
+        label = self.smallfont.render("제어", True, (30, 30, 30))
         screen.blit(label, (area.x + 30, y))
         y += 50
 
@@ -1900,13 +1880,13 @@ class ProfileScreen(ScreenBase):
             rect = pygame.Rect(area.x + 40, y, 220, 45)
 
             # Hover 감지
-            hovered = rect.collidepoint(mouse_pos)
+            hovered = rect.collidepoint(mousepos)
             base_color = (230, 230, 230)
             hover_color = (210, 215, 225)
             color = hover_color if hovered else base_color
 
             pygame.draw.rect(screen, color, rect, border_radius=10)
-            text = self.small_font.render(name, True, (40, 40, 40))
+            text = self.smallfont.render(name, True, (40, 40, 40))
             screen.blit(text, text.get_rect(center=rect.center))
 
             self.control_buttons.append((name, rect))
@@ -1935,7 +1915,7 @@ class ProfileScreen(ScreenBase):
                 rect = pygame.Rect(x, y, key_w, key_h)
                 pygame.draw.rect(screen, (250, 250, 250), rect, border_radius=8)
                 pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=8)
-                t = self.small_font.render(key, True, (30, 30, 30))
+                t = self.smallfont.render(key, True, (30, 30, 30))
                 screen.blit(t, t.get_rect(center=rect.center))
                 self.key_buttons.append((key, rect))
                 x += key_w + gap
@@ -1949,7 +1929,7 @@ class ProfileScreen(ScreenBase):
             w = 200 if special == "Space" else 100
             rect = pygame.Rect(x, specials_y, w, key_h)
             pygame.draw.rect(screen, (220, 220, 220), rect, border_radius=10)
-            text = self.small_font.render(special, True, (30, 30, 30))
+            text = self.smallfont.render(special, True, (30, 30, 30))
             screen.blit(text, text.get_rect(center=rect.center))
             self.key_buttons.append((special, rect))
             x += w + 20
@@ -1966,21 +1946,21 @@ class ProfileScreen(ScreenBase):
             area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40,
                                self.ui.height - self.ui.bottom.h - 90)
             input_rect = pygame.Rect(area.x + 30, area.y + 70, 220, 50)
-            add_btn_rect = pygame.Rect(input_rect.right + 20, area.y + 70, 120, 50)
+            addbtn_rect = pygame.Rect(input_rect.right + 20, area.y + 70, 120, 50)
 
             if input_rect.collidepoint(pos):
                 self._toggle_keyboard(True)
                 return
 
             # 프로필 추가 버튼
-            if add_btn_rect.collidepoint(pos):
+            if addbtn_rect.collidepoint(pos):
                 self._add_profile()
                 return
 
             # 제어 버튼 클릭
             for name, rect in self.control_buttons:
                 if rect.collidepoint(pos):
-                    self.ui.logger.log(self.ui.depth_path, f"ControlButton: {name}", pos, len(self.ui.depth_path))
+                    self.ui.logger.log(self.ui.depth_path,f"ControlButton_{name}", pos,len(self.ui.depth_path))
                     return
 
             # 키보드 클릭 처리
@@ -1993,7 +1973,7 @@ class ProfileScreen(ScreenBase):
 
                 if clicked_key:
                     self._handle_key_input(clicked_key)
-                    self.ui.logger.log(self.ui.depth_path, f"KeyPress: {clicked_key}", pos, len(self.ui.depth_path))
+                    self.ui.logger.log(self.ui.depth_path,f"KeyPress_{clicked_key}", pos,len(self.ui.depth_path))
                     return
 
                 # 키보드 외부 클릭 시 닫기
@@ -2019,7 +1999,7 @@ class ConvenienceScreen(ScreenBase):
         super().__init__("Conv Setting", ui)
         self.ui = ui
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.colors = ui.colors
 
         # 모드 상태 (True = ON, False = OFF)
@@ -2036,14 +2016,11 @@ class ConvenienceScreen(ScreenBase):
     def _toggle_mode(self, name):
         self.modes[name] = not self.modes[name]
         state = "ON" if self.modes[name] else "OFF"
-        self.ui.logger.log(
-            self.ui.depth_path,
-            f"{name}: {state}",
-            pygame.mouse.get_pos(),
+        self.ui.logger.log(self.ui.depth_path,f"{name}_{state}",pygame.mouse.get_pos(),
             len(self.ui.depth_path)
         )
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                         self.ui.width - left_w - 40,
@@ -2067,7 +2044,7 @@ class ConvenienceScreen(ScreenBase):
             pygame.draw.rect(screen, (220, 220, 220), card, 1, border_radius=14)
 
             # 제목
-            label = self.small_font.render(name, True, (30, 30, 30))
+            label = self.smallfont.render(name, True, (30, 30, 30))
             screen.blit(label, (card.x + 20, card.y + 18))
 
             # 설명 여러 줄
@@ -2083,14 +2060,14 @@ class ConvenienceScreen(ScreenBase):
 
             line_y = card.y + 48
             for line in desc_lines:
-                desc_text = self.ui.tiny_font.render(line, True, (80, 80, 80))
-                screen.blit(desc_text, (card.x + 20, line_y))
+                desctext = self.ui.tiny_font.render(line, True, (80, 80, 80))
+                screen.blit(desctext, (card.x + 20, line_y))
                 line_y += 20
 
             # 버튼
             btn_rect = pygame.Rect(card.right - 90, card.bottom - 45, 70, 32)
             active = self.modes[name]
-            hover = btn_rect.collidepoint(mouse_pos)
+            hover = btn_rect.collidepoint(mousepos)
             base_color = (150, 255, 150) if active else (200, 200, 200)
             hover_color = (150, 255, 150) if active else (180, 180, 180)
             color = hover_color if hover else base_color
@@ -2129,7 +2106,7 @@ class ConnectivityScreen(ScreenBase):
             "모바일 데이터": False
         }
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40,
                            self.ui.height - self.ui.bottom.h - 90)
@@ -2171,7 +2148,7 @@ class ConnectivityScreen(ScreenBase):
                 state = "On" if self.items[name] else "Off"
 
                 # 로그 남기기
-                self.ui.logger.log(self.ui.depth_path, f"{name}: {state}", pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"{name}_{state}", pos,len(self.ui.depth_path))
                 return True
         return False
 
@@ -2189,7 +2166,7 @@ class AppsSettingsScreen(ScreenBase):
 
         self.buttons = []  # 버튼 객체 저장용
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -2212,7 +2189,7 @@ class AppsSettingsScreen(ScreenBase):
 
             # 강제 종료 버튼
             btn_rect = pygame.Rect(area.right - 120, y + 12, 90, 28)
-            hovered = btn_rect.collidepoint(mouse_pos)
+            hovered = btn_rect.collidepoint(mousepos)
             color = (180, 180, 180) if hovered else (200, 200, 200)
             pygame.draw.rect(screen, color, btn_rect, border_radius=8)
 
@@ -2227,7 +2204,7 @@ class AppsSettingsScreen(ScreenBase):
         for app, rect in self.buttons:
             if rect.collidepoint(pos):
                 # 로그 남기기
-                self.ui.logger.log(self.ui.depth_path, f"{app}: 강제 종료", pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,f"{app}_forced_terminated", pos,len(self.ui.depth_path))
                 return True
         return False
 
@@ -2258,7 +2235,7 @@ class GeneralSettingsScreen(ScreenBase):
         self.toggle_rect = None
         self.unit_button_rects = {}  # {항목: [rect, rect, ...]}
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -2314,7 +2291,7 @@ class GeneralSettingsScreen(ScreenBase):
         if self.toggle_rect and self.toggle_rect.collidepoint(pos):
             self.show_subspeed = not self.show_subspeed
             state = "On" if self.show_subspeed else "Off"
-            self.ui.logger.log(self.ui.depth_path, f"보조 속도 표시: {state}", pos, len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path,f"sub_speed_rep_{state}", pos,len(self.ui.depth_path))
             return True
 
         # 단위 버튼 클릭
@@ -2322,7 +2299,7 @@ class GeneralSettingsScreen(ScreenBase):
             for opt, rect in rects:
                 if rect.collidepoint(pos):
                     self.selected_units[category] = opt
-                    self.ui.logger.log(self.ui.depth_path, f"{category}: {opt}", pos, len(self.ui.depth_path))
+                    self.ui.logger.log(self.ui.depth_path,f"{category}_{opt}", pos,len(self.ui.depth_path))
                     return True
         return False
 
@@ -2342,7 +2319,7 @@ class VehicleInfoScreen(ScreenBase):
         self.toggle_rect = None
         self.reset_button_rect = None
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -2390,23 +2367,23 @@ class VehicleInfoScreen(ScreenBase):
         btn_rect = pygame.Rect(area.x + 280, y - 4, 100, 34)
         self.reset_button_rect = btn_rect
 
-        hovered = btn_rect.collidepoint(mouse_pos)
+        hovered = btn_rect.collidepoint(mousepos)
         color = (200, 200, 200) if not hovered else (180, 180, 180)
         pygame.draw.rect(screen, color, btn_rect, border_radius=8)
-        btn_text = self.ui.tiny_font.render("초기화", True, (40, 40, 40))
-        screen.blit(btn_text, btn_text.get_rect(center=btn_rect.center))
+        btntext = self.ui.tiny_font.render("초기화", True, (40, 40, 40))
+        screen.blit(btntext, btntext.get_rect(center=btn_rect.center))
 
     def on_click(self, pos):
         # 토글 클릭
         if self.toggle_rect and self.toggle_rect.collidepoint(pos):
             self.auto_update = not self.auto_update
             state = "On" if self.auto_update else "Off"
-            self.ui.logger.log(self.ui.depth_path, f"업데이트 자동 다운로드: {state}", pos, len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path,f"update_auto_download_{state}", pos,len(self.ui.depth_path))
             return True
 
         # 초기화 버튼 클릭
         if self.reset_button_rect and self.reset_button_rect.collidepoint(pos):
-            self.ui.logger.log(self.ui.depth_path, "공장 초기화: 실행", pos, len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path, "initialize", pos, len(self.ui.depth_path))
             print("Clicked: 공장 초기화")
             return True
 
@@ -2421,7 +2398,7 @@ class SimpleListScreen(ScreenBase):
         super().__init__(name, ui)
         self.items = items
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70, self.ui.width - left_w - 40, self.ui.height - self.ui.bottom.h - 90)
         pygame.draw.rect(screen, (248,248,248), area, border_radius=14)
@@ -2466,11 +2443,10 @@ class NavigationScreen(ScreenBase):
         self._init_buttons()
 
     def _handle_nav_click(self, label):
-        """로그 1회 + 서브스크린 진입"""
         if self._debounced():
             return
         pos = pygame.mouse.get_pos()
-        self.ui.logger.log(self.ui.depth_path, label, pos, len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path, label,pos,len(self.ui.depth_path))
         key = self.label2key.get(label, label)
         self._enter_subscreen(key)
 
@@ -2514,7 +2490,7 @@ class NavigationScreen(ScreenBase):
         if self._debounced():
             return
         pos = pygame.mouse.get_pos()
-        self.ui.logger.log(self.ui.depth_path, label, pos, len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path, label,pos,len(self.ui.depth_path))
         key = self.label2key.get(label, label)
         self._enter_subscreen(key)
 
@@ -2536,9 +2512,9 @@ class NavigationScreen(ScreenBase):
             self.ui.depth_path.pop()
         self.sub_screen = None
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         if self.sub_screen:
-            self.sub_screen.draw(screen, mouse_pos)
+            self.sub_screen.draw(screen, mousepos)
             return
 
         left_w = self.ui.side.width
@@ -2552,7 +2528,7 @@ class NavigationScreen(ScreenBase):
         screen.blit(title, (left_w + 50, 100))
 
         for btn in self.buttons:
-            btn.draw(screen, mouse_pos)
+            btn.draw(screen, mousepos)
 
     def handle_click(self, pos):
         """UI_manager에서 클릭 전달"""
@@ -2573,7 +2549,7 @@ class DestinationScreen(ScreenBase):
     def __init__(self, ui, nav_parent=None):
         super().__init__("Destination", ui)
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.text_input = ""
         self.keyboard_visible = True
         self.nav_parent = nav_parent
@@ -2586,7 +2562,7 @@ class DestinationScreen(ScreenBase):
         if self.input_rect and self.input_rect.collidepoint(pos):
             self.keyboard_visible = True
             self.text_input = ""
-            self.ui.logger.log(self.ui.depth_path, "검색창 클릭(초기화)", pos, len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path, "searchbox", pos, len(self.ui.depth_path))
             return True
 
         for key, rect in self.key_buttons:
@@ -2598,7 +2574,7 @@ class DestinationScreen(ScreenBase):
         return False
 
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(
             left_w + 20, 70,
@@ -2612,11 +2588,11 @@ class DestinationScreen(ScreenBase):
         self.input_rect = pygame.Rect(area.x + 30, area.y + 70, 500, 60)
         pygame.draw.rect(screen, (255, 255, 255), self.input_rect, border_radius=10)
         pygame.draw.rect(screen, (200, 200, 200), self.input_rect, 2, border_radius=10)
-        text = self.small_font.render(self.text_input or "검색어를 입력하세요...", True, (50, 50, 50))
+        text = self.smallfont.render(self.text_input or "검색어를 입력하세요...", True, (50, 50, 50))
         screen.blit(text, (self.input_rect.x + 10, self.input_rect.y + 20))
 
         if not self.keyboard_visible and self.text_input.strip():
-            msg = self.small_font.render(f"'{self.text_input}' 검색 완료", True, (70, 70, 70))
+            msg = self.smallfont.render(f"'{self.text_input}' 검색 완료", True, (70, 70, 70))
             screen.blit(msg, (area.x + 30, area.y + 160))
 
         if self.keyboard_visible:
@@ -2638,7 +2614,7 @@ class DestinationScreen(ScreenBase):
                 rect = pygame.Rect(x, y, key_w, key_h)
                 pygame.draw.rect(screen, (250, 250, 250), rect, border_radius=8)
                 pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=8)
-                t = self.small_font.render(key, True, (30, 30, 30))
+                t = self.smallfont.render(key, True, (30, 30, 30))
                 screen.blit(t, t.get_rect(center=rect.center))
                 self.key_buttons.append((key, rect))
                 x += key_w + gap
@@ -2651,7 +2627,7 @@ class DestinationScreen(ScreenBase):
             w = 220 if special == "Space" else 120
             rect = pygame.Rect(x, specials_y, w, key_h)
             pygame.draw.rect(screen, (220, 220, 220), rect, border_radius=10)
-            text = self.small_font.render(special, True, (30, 30, 30))
+            text = self.smallfont.render(special, True, (30, 30, 30))
             screen.blit(text, text.get_rect(center=rect.center))
             self.key_buttons.append((special, rect))
             x += w + 20
@@ -2665,7 +2641,7 @@ class DestinationScreen(ScreenBase):
             if self.input_rect and self.input_rect.collidepoint(pos):
                 self.keyboard_visible = True
                 self.text_input = ""
-                self.ui.logger.log(self.ui.depth_path, "검색창 클릭(초기화)", pos, len(self.ui.depth_path))
+                self.ui.logger.log(self.ui.depth_path,"searchbox", pos, len(self.ui.depth_path))
                 return True
 
             # 키보드 입력 처리
@@ -2679,23 +2655,23 @@ class DestinationScreen(ScreenBase):
     def _handle_key_input(self, key, pos=None):
         if key == "Back":
             self.text_input = self.text_input[:-1]
-            self.ui.logger.log(self.ui.depth_path, "Key:Backspace", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path,"Key_Backspace", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
         elif key == "Space":
             self.text_input += " "
-            self.ui.logger.log(self.ui.depth_path, "Key:Space", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path,"Key_Space", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
         elif key == "Enter":
             self.keyboard_visible = False
-            self.ui.logger.log(self.ui.depth_path, f"Search Enter: {self.text_input}", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path,f"Search_Enter_{self.text_input}", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
         else:
             self.text_input += key
-            self.ui.logger.log(self.ui.depth_path, f"Key:{key}", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
+            self.ui.logger.log(self.ui.depth_path,f"Key_{key}", pos or pygame.mouse.get_pos(), len(self.ui.depth_path))
 
 
 class FavoritesScreen(ScreenBase):
     def __init__(self, ui, nav_parent=None):
         super().__init__("Favorites", ui)
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.addresses = [f"주소{i}" for i in range(1, 6)]
         self.nav_parent = nav_parent
         self.popup_active = False
@@ -2728,7 +2704,7 @@ class FavoritesScreen(ScreenBase):
         return False
 
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -2740,34 +2716,31 @@ class FavoritesScreen(ScreenBase):
         for addr, rect in self.addr_buttons:
             pygame.draw.rect(screen, (255, 255, 255), rect, border_radius=10)
             pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=10)
-            s = self.small_font.render(addr, True, (40, 40, 40))
+            s = self.smallfont.render(addr, True, (40, 40, 40))
             screen.blit(s, s.get_rect(center=rect.center))
 
         if self.popup_active:
             overlay = pygame.Surface((self.ui.width, self.ui.height), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 80))
             screen.blit(overlay, (0, 0))
-            self._draw_popup(screen, area, mouse_pos)
+            self._draw_popup(screen, area, mousepos)
 
     def _open_popup(self, addr, pos):
         """주소 클릭 시 팝업 표시"""
         self.popup_active = True
         self.popup_target = addr
-        self.ui.logger.log(self.ui.depth_path, f"주소 선택 클릭: {addr}", pos, len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"addr_{addr}", pos,len(self.ui.depth_path))
 
     def _close_popup(self, choice, pos):
         """팝업 닫기 + 로그 남기기"""
-        self.ui.logger.log(
-            self.ui.depth_path,
-            f"목적지 설정 확인({choice}): {self.popup_target}",
-            pos, len(self.ui.depth_path)
+        self.ui.logger.log(self.ui.depth_path,f"destination({choice})_{self.popup_target}", pos, len(self.ui.depth_path)
         )
         self.popup_active = False
         self.popup_target = None
         self.popup_yes = None
         self.popup_no = None
 
-    def _draw_popup(self, screen, area, mouse_pos):
+    def _draw_popup(self, screen, area, mousepos):
         """팝업창 그리기"""
         w, h = 520, 200
         r = pygame.Rect(0, 0, w, h)
@@ -2779,7 +2752,7 @@ class FavoritesScreen(ScreenBase):
 
         # 메시지 텍스트
         msg = f"‘{self.popup_target}’을(를) 목적지로 설정하시겠습니까?"
-        t = self.small_font.render(msg, True, (40, 40, 40))
+        t = self.smallfont.render(msg, True, (40, 40, 40))
         screen.blit(t, t.get_rect(center=(r.centerx, r.y + 70)))
 
         # 버튼 영역
@@ -2789,9 +2762,9 @@ class FavoritesScreen(ScreenBase):
 
         # 버튼 그리기
         for label, rect in [("예", yes), ("아니오", no)]:
-            color = (150, 255, 150) if rect.collidepoint(mouse_pos) else (230, 230, 230)
+            color = (150, 255, 150) if rect.collidepoint(mousepos) else (230, 230, 230)
             pygame.draw.rect(screen, color, rect, border_radius=8)
-            s = self.small_font.render(label, True, (20, 20, 20))
+            s = self.smallfont.render(label, True, (20, 20, 20))
             screen.blit(s, s.get_rect(center=rect.center))
 
 
@@ -2819,7 +2792,7 @@ class RecentScreen(ScreenBase):
     def __init__(self, ui, nav_parent=None):
         super().__init__("Recent", ui)
         self.font = ui.font
-        self.small_font = ui.small_font
+        self.smallfont = ui.small_font
         self.addresses = [f"최근 목적지{i}" for i in range(1, 6)]
         self.addr_buttons = []
         self.popup_active = False
@@ -2849,23 +2822,23 @@ class RecentScreen(ScreenBase):
     def _open_popup(self, addr, pos):
         self.popup_active = True
         self.popup_target = addr
-        self.ui.logger.log(self.ui.depth_path, f"최근 선택 클릭: {addr}", pos, len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"recent_{addr}", pos,len(self.ui.depth_path))
 
     def _close_popup(self, choice, pos):
-        self.ui.logger.log(self.ui.depth_path, f"목적지 설정 확인({choice}): {self.popup_target}", pos, len(self.ui.depth_path))
+        self.ui.logger.log(self.ui.depth_path,f"dest_check_({choice})_{self.popup_target}", pos, len(self.ui.depth_path))
         self.popup_active = False
         self.popup_target = None
         self.popup_yes = None
         self.popup_no = None
 
-    def _draw_popup(self, screen, area, mouse_pos):
+    def _draw_popup(self, screen, area, mousepos):
         w, h = 520, 200
         r = pygame.Rect(0, 0, w, h)
         r.center = (area.centerx, area.centery)
         pygame.draw.rect(screen, (255, 255, 255), r, border_radius=12)
         pygame.draw.rect(screen, (160, 160, 160), r, 2, border_radius=12)
         msg = f"‘{self.popup_target}’을(를) 목적지로 설정하시겠습니까?"
-        t = self.small_font.render(msg, True, (40, 40, 40))
+        t = self.smallfont.render(msg, True, (40, 40, 40))
         screen.blit(t, t.get_rect(center=(r.centerx, r.y + 70)))
 
         yes = pygame.Rect(r.centerx - 110, r.y + 120, 90, 40)
@@ -2873,12 +2846,12 @@ class RecentScreen(ScreenBase):
         self.popup_yes, self.popup_no = yes, no
 
         for label, rect in [("예", yes), ("아니오", no)]:
-            color = (150, 255, 150) if rect.collidepoint(mouse_pos) else (230, 230, 230)
+            color = (150, 255, 150) if rect.collidepoint(mousepos) else (230, 230, 230)
             pygame.draw.rect(screen, color, rect, border_radius=8)
-            s = self.small_font.render(label, True, (20, 20, 20))
+            s = self.smallfont.render(label, True, (20, 20, 20))
             screen.blit(s, s.get_rect(center=rect.center))
 
-    def draw(self, screen, mouse_pos):
+    def draw(self, screen, mousepos):
         left_w = self.ui.side.width
         area = pygame.Rect(left_w + 20, 70,
                            self.ui.width - left_w - 40,
@@ -2893,7 +2866,7 @@ class RecentScreen(ScreenBase):
             rect = pygame.Rect(area.x + 40, y, 420, 52)
             pygame.draw.rect(screen, (255, 255, 255), rect, border_radius=10)
             pygame.draw.rect(screen, (200, 200, 200), rect, 2, border_radius=10)
-            s = self.small_font.render(addr, True, (40, 40, 40))
+            s = self.smallfont.render(addr, True, (40, 40, 40))
             screen.blit(s, s.get_rect(center=rect.center))
             self.addr_buttons.append((addr, rect))
             y += 70
@@ -2902,7 +2875,7 @@ class RecentScreen(ScreenBase):
             overlay = pygame.Surface((self.ui.width, self.ui.height), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 80))
             screen.blit(overlay, (0, 0))
-            self._draw_popup(screen, area, mouse_pos)
+            self._draw_popup(screen, area, mousepos)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -2930,7 +2903,7 @@ class RecentScreen(ScreenBase):
 # -------------------------------
 # helper
 # -------------------------------
-def _fit_into(src_size, max_size):
+def fit_into(src_size, max_size):
     sw, sh = src_size; mw, mh = max_size
     k = min(mw/sw, mh/sh)
     return (max(1, int(sw*k)), max(1, int(sh*k)))

@@ -1,5 +1,5 @@
 import pygame, sys, time
-from UI_screens import (
+from UI_screens_enlog_final import (
     Logger, Button, TopBar, SidePanel, BottomBar,
     HomeScreen, QuickSettingsScreen, ChargingScreen,
     AppsScreen, RadioScreen, MusicScreen, NavigationScreen, 
@@ -86,9 +86,29 @@ class UIModel:
 
 
     def go_back(self):
+        """뒤로가기 버튼 처리"""
+        # 최소 1개 이상 있는 경우에만 처리
         if len(self.depth_path) > 1:
+            last = self.depth_path[-1]
+
+            if last in ("Destination", "Favorites", "Recent"):
+                # 경로 pop
+                self.depth_path.pop()
+
+                # Navigation 스크린 불러오기
+                nav_screen = self.screens.get("Navigation")
+                if nav_screen:
+                    nav_screen.close_subscreen()   # 내부 sub_screen 닫기
+                    self.current = nav_screen      # 현재 화면 유지 (Navigation)
+                return
+
             self.depth_path.pop()
-            self.current = self.screens[self.depth_path[-1]]
+            prev_key = self.depth_path[-1]
+            self.current = self.screens.get(prev_key, self.screens["Home"])
+
+        else:
+            self.depth_path = ["Home"]
+            self.current = self.screens["Home"]
 
     # 메인 루프
     def run(self):
