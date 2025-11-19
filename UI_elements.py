@@ -20,6 +20,7 @@ import pygame, csv, time, os
 class Logger:
     def __init__(self, file_path: str):
         self.file = file_path
+        self.did_log = False
         dir_path = os.path.dirname(self.file)
         if dir_path:  # 디렉터리 경로가 있을 때만 생성
             os.makedirs(dir_path, exist_ok=True)
@@ -28,6 +29,7 @@ class Logger:
             w.writerow(["Timestamp", "Path", "Target", "Pos", "Depth"])
 
     def log(self, path_list, target, pos, depth: int):
+        self.did_log = True
         now_unix = time.time()  # UNIX timestamp
         with open(self.file, "a", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
@@ -45,7 +47,7 @@ class Button:
         self.colors = colors
         self.icon = icon
         self.is_pressed = False  # 클릭 상태 추가
-        self.log_name = log_name  # ← 추가
+        self.log_name = log_name
 
     def draw(self, surface, mouse_pos):
         hovered = self.rect.collidepoint(mouse_pos)
@@ -72,18 +74,7 @@ class Button:
         """좌표가 버튼 영역 안에 있는지 확인"""
         return self.rect.collidepoint(pos)
 
-    def trigger(self, ui, pos):
-        """버튼 클릭 시 공통 동작 (로그 + 액션 실행)"""
-        # 로그 기록
-        ui.logger.log(ui.depth_path, self.text, pos, len(ui.depth_path))
-
-        # 연결된 액션이 있으면 실행
-        if callable(self.action):
-            self.action()
-
-
     def trigger(self, ui, pos=None):
-
         # 기존 text 대신 log_name이 있으면 그걸 사용
         log_target = self.log_name if self.log_name else self.text
         ui.logger.log(ui.depth_path, log_target, pos or pygame.mouse.get_pos(), len(ui.depth_path))

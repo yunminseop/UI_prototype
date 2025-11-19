@@ -133,6 +133,7 @@ class UIModel:
 
             # events
             for e in pygame.event.get():
+                self.logger.did_log = False
                 if e.type == pygame.QUIT:
                     running = False
 
@@ -166,7 +167,7 @@ class UIModel:
                             handled = True
 
                     # 3) 어떤 UI 요소에도 해당되지 않은 클릭 → Null 로깅
-                    if not handled:
+                    if not handled and not self.logger.did_log:
                         self.logger.log(self.depth_path, "Null", e.pos, len(self.depth_path))
 
                 # 개별 화면 이벤트(스크롤 등) 필요 시
