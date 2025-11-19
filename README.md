@@ -1,6 +1,15 @@
+***About Hyundai PLEOS***   
+
+- [Hyundai Newsroom_PLEOS 25](https://www.hyundaimotorgroup.com/ko/news/CONT0000000000172880)
+
+![Image](https://github.com/user-attachments/assets/5c761ee5-390a-4a00-901d-ad78c416907a)
+*source: https://www.hyundaimotorgroup.com/ko/news/CONT0000000000172880*   
+
+---
+
 ***PLEOS UI Replica Project***
 
-This project is a front-end replica of Hyundai’s PLEOS UI, built with the goal of recreating the visual design and interaction patterns as closely as possible to the real in-vehicle system.
+This project is a front-end replica of Hyundai’s PLEOS UI, built with the goal of recreating the visual design and interaction patterns as closely as possible to the real in-vehicle system.   
 
 ✨ Implemented Features
 1. Quick Settings (18 Items)
