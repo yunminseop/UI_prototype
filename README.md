@@ -3,7 +3,6 @@
 - [Hyundai Newsroom_PLEOS 25](https://www.hyundaimotorgroup.com/ko/news/CONT0000000000172880)
 
 ![Image](https://github.com/user-attachments/assets/5c761ee5-390a-4a00-901d-ad78c416907a)
-*source: https://www.hyundaimotorgroup.com/ko/news/CONT0000000000172880*   
 
 ---
 
